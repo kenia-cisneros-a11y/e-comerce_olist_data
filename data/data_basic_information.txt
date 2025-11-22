@@ -1,0 +1,434 @@
+Database found at: c:\Users\kenia\OneDrive\Documents\GitHub\cobre\scripts\..\data\olist.sqlite
+
+================================================================================
+DATAFRAME EXPLORATION REPORT - ORDER_PAYMENTS
+================================================================================
+
+Dataset shape: 103886 rows × 5 columns
+Memory usage: 17.81 MB
+
+────────────────────────────────────────────────────────────
+DETAILED COLUMN ANALYSIS
+────────────────────────────────────────────────────────────
+
+============================================================
+DATAFRAME STRUCTURE ANALYSIS
+============================================================
+
+Total columns: 5
+Total rows: 103886
+
+Column type distribution:
+likely_type
+Numeric        3
+ID             1
+Categorical    1
+Name: count, dtype: int64
+
+Column Details:
+            column_name data_type  null_count null_percentage  unique_count unique_percentage                                                                                           sample_values  likely_type  min       max        mean  median
+0              order_id    object           0            0.0%         99440             95.7%  [b81ef226f3fe1789b1e8b2acac839d17, a9810da82917af2d9aefd1278f1dcfa0, 25e8ea4e93396b6fa0d3dd708e76c1bd]           ID  NaN       NaN         NaN     NaN
+1    payment_sequential     int64           0            0.0%            29              0.0%                                                                                                     NaN      Numeric  1.0     29.00    1.092679     1.0
+2          payment_type    object           0            0.0%             5              0.0%                                                                 [credit_card, credit_card, credit_card]  Categorical  NaN       NaN         NaN     NaN
+3  payment_installments     int64           0            0.0%            24              0.0%                                                                                                     NaN      Numeric  0.0     24.00    2.853349     1.0
+4         payment_value   float64           0            0.0%         29077             28.0%                                                                                                     NaN      Numeric  0.0  13664.08  154.100380   100.0
+
+────────────────────────────────────────────────────────────
+CATEGORICAL COLUMNS
+────────────────────────────────────────────────────────────
+Found 1 categorical columns suitable for analysis:
+  • payment_type
+{'payment_type': array(['credit_card', 'boleto', 'voucher', 'debit_card', 'not_defined'],
+      dtype=object)}
+
+================================================================================
+DATAFRAME EXPLORATION REPORT - ORDERS
+================================================================================
+
+Dataset shape: 99441 rows × 8 columns
+Memory usage: 26.93 MB
+
+────────────────────────────────────────────────────────────
+DETAILED COLUMN ANALYSIS
+────────────────────────────────────────────────────────────
+
+============================================================
+DATAFRAME STRUCTURE ANALYSIS
+============================================================
+
+Total columns: 8
+Total rows: 99441
+
+Column type distribution:
+likely_type
+DateTime       5
+ID             2
+Categorical    1
+Name: count, dtype: int64
+
+Column Details:
+                     column_name       data_type  null_count null_percentage  unique_count unique_percentage                                                                                           sample_values  likely_type
+0                       order_id          object           0            0.0%         99441            100.0%  [e481f51cbdc54678b7cc49136f2d6af7, 53cdb2fc8bc7dce0b6741e2150273451, 47770eb9100c2d0c44946d9cf07ec65d]           ID
+1                    customer_id          object           0            0.0%         99441            100.0%  [9ef432eb6251297304e76186b10a928d, b0830fb4747a6c6d20dea0b8c802d7ef, 41ce2a54c0b03bf3443c3d931a367089]           ID
+2                   order_status          object           0            0.0%             8              0.0%                                                                       [delivered, delivered, delivered]  Categorical
+3       order_purchase_timestamp  datetime64[ns]           0            0.0%         98875             99.4%                                                                                                     NaN     DateTime
+4              order_approved_at  datetime64[ns]         160            0.2%         90733             91.2%                                                                                                     NaN     DateTime
+5   order_delivered_carrier_date  datetime64[ns]        1783            1.8%         81018             81.5%                                                                                                     NaN     DateTime
+6  order_delivered_customer_date  datetime64[ns]        2965            3.0%         95664             96.2%                                                                                                     NaN     DateTime
+7  order_estimated_delivery_date  datetime64[ns]           0            0.0%           459              0.5%                                                                                                     NaN     DateTime
+
+────────────────────────────────────────────────────────────
+CATEGORICAL COLUMNS
+────────────────────────────────────────────────────────────
+Found 1 categorical columns suitable for analysis:
+  • order_status
+{'order_status': array(['delivered', 'invoiced', 'shipped', 'processing', 'unavailable'],
+      dtype=object)}
+
+================================================================================
+DATAFRAME EXPLORATION REPORT - ORDER_ITEMS
+================================================================================
+
+Dataset shape: 112650 rows × 7 columns
+Memory usage: 32.12 MB
+
+────────────────────────────────────────────────────────────
+DETAILED COLUMN ANALYSIS
+────────────────────────────────────────────────────────────
+
+============================================================
+DATAFRAME STRUCTURE ANALYSIS
+============================================================
+
+Total columns: 7
+Total rows: 112650
+
+Column type distribution:
+likely_type
+ID          4
+Numeric     2
+DateTime    1
+Name: count, dtype: int64
+
+Column Details:
+           column_name       data_type  null_count null_percentage  unique_count unique_percentage                                                                                           sample_values likely_type   min      max        mean  median
+0             order_id          object           0            0.0%         98666             87.6%  [00010242fe8c5a6d1ba2dd792cb16214, 00018f77f2f0320c557190d7a144bdd3, 000229ec398224ef6ca0657da4fc703e]          ID   NaN      NaN         NaN     NaN
+1        order_item_id           int64           0            0.0%            21              0.0%                                                                                                     NaN          ID  1.00    21.00    1.197834    1.00
+2           product_id          object           0            0.0%         32951             29.3%  [4244733e06e7ecb4970a6e2683c13e61, e5f2d52b802189ee658865ca93d83a8f, c777355d18b72b67abbeef9df44fd0fd]          ID   NaN      NaN         NaN     NaN
+3            seller_id          object           0            0.0%          3095              2.7%  [48436dade18ac8b2bce089ec2a041202, dd7ddc04e1b6c2c614352b383efe2d36, 5b51032eddd242adc84c38acab88f23d]          ID   NaN      NaN         NaN     NaN
+4  shipping_limit_date  datetime64[ns]           0            0.0%         93318             82.8%                                                                                                     NaN    DateTime   NaN      NaN         NaN     NaN
+5                price         float64           0            0.0%          5968              5.3%                                                                                                     NaN     Numeric  0.85  6735.00  120.653739   74.99
+6        freight_value         float64           0            0.0%          6999              6.2%                                                                                                     NaN     Numeric  0.00   409.68   19.990320   16.26
+
+────────────────────────────────────────────────────────────
+CATEGORICAL COLUMNS
+────────────────────────────────────────────────────────────
+Found 0 categorical columns suitable for analysis:
+{}
+
+================================================================================
+DATAFRAME EXPLORATION REPORT - ORDER_REVIEWS
+================================================================================
+
+Dataset shape: 99224 rows × 7 columns
+Memory usage: 30.86 MB
+
+────────────────────────────────────────────────────────────
+DETAILED COLUMN ANALYSIS
+────────────────────────────────────────────────────────────
+
+============================================================
+DATAFRAME STRUCTURE ANALYSIS
+============================================================
+
+Total columns: 7
+Total rows: 99224
+
+Column type distribution:
+likely_type
+ID             2
+Categorical    2
+DateTime       2
+Numeric        1
+Name: count, dtype: int64
+
+Column Details:
+               column_name       data_type  null_count null_percentage  unique_count unique_percentage                                                                                                                                                                                                                                                                                                                  sample_values  likely_type  min  max      mean  median
+0                review_id          object           0            0.0%         98410             99.2%                                                                                                                                                                                                                         [7bc2406110b926393aa56f80a40eba40, 80e641a11e56f04c1ad469d5645fdfde, 228ce5500dc1d8e020d8d1322874b6f0]           ID  NaN  NaN       NaN     NaN
+1                 order_id          object           0            0.0%         98673             99.4%                                                                                                                                                                                                                         [73fc7af87114b39712e6da79b0a377eb, a548910a1c6147796b98fdf73dbeba33, f9e4b658b201a9f2ecdecbb34bed034b]           ID  NaN  NaN       NaN     NaN
+2             review_score           int64           0            0.0%             5              0.0%                                                                                                                                                                                                                                                                                                                            NaN      Numeric  1.0  5.0  4.086421     5.0
+3     review_comment_title          object       87656           88.3%          4527              4.6%                                                                                                                                                                                                                                                                          [recomendo, Super recomendo, Não chegou meu produto ]  Categorical  NaN  NaN       NaN     NaN
+4   review_comment_message          object       58247           58.7%         36159             36.4%  [Recebi bem antes do prazo estipulado., Parabéns lojas lannister adorei comprar pela Internet seguro e prático Parabéns a todos feliz Páscoa, aparelho eficiente. no site a marca do aparelho esta impresso como 3desinfector e ao chegar esta com outro nome...atualizar com a marca correta uma vez que é o mesmo aparelho]  Categorical  NaN  NaN       NaN     NaN
+5     review_creation_date  datetime64[ns]           0            0.0%           636              0.6%                                                                                                                                                                                                                                                                                                                            NaN     DateTime  NaN  NaN       NaN     NaN
+6  review_answer_timestamp  datetime64[ns]           0            0.0%         98248             99.0%                                                                                                                                                                                                                                                                                                                            NaN     DateTime  NaN  NaN       NaN     NaN
+
+────────────────────────────────────────────────────────────
+CATEGORICAL COLUMNS
+────────────────────────────────────────────────────────────
+Found 2 categorical columns suitable for analysis:
+  • review_comment_title
+  • review_comment_message
+{'review_comment_title': array(['recomendo', 'Super recomendo', 'Não chegou meu produto ', 'Ótimo',
+       'Muito bom.'], dtype=object), 'review_comment_message': array(['Recebi bem antes do prazo estipulado.',
+       'Parabéns lojas lannister adorei comprar pela Internet seguro e prático Parabéns a todos feliz Páscoa',
+       'aparelho eficiente. no site a marca do aparelho esta impresso como 3desinfector e ao chegar esta com outro nome...atualizar com a marca correta uma vez que é o mesmo aparelho',
+       'Mas um pouco ,travando...pelo valor ta Boa.\r\n',
+       'Vendedor confiável, produto ok e entrega antes do prazo.'],
+      dtype=object)}
+
+================================================================================
+DATAFRAME EXPLORATION REPORT - PRODUCTS
+================================================================================
+
+Dataset shape: 32951 rows × 9 columns
+Memory usage: 6.79 MB
+
+────────────────────────────────────────────────────────────
+DETAILED COLUMN ANALYSIS
+────────────────────────────────────────────────────────────
+
+============================================================
+DATAFRAME STRUCTURE ANALYSIS
+============================================================
+
+Total columns: 9
+Total rows: 32951
+
+Column type distribution:
+likely_type
+Numeric        7
+ID             1
+Categorical    1
+Name: count, dtype: int64
+
+Column Details:
+                  column_name data_type  null_count null_percentage  unique_count unique_percentage                                                                                           sample_values  likely_type  min      max         mean  median
+0                  product_id    object           0            0.0%         32951            100.0%  [1e9e8ef04dbcff4541ed26657ea517e5, 3aa071139cb16b67ca9e5dea641aaa2f, 96bd76ec8810374ed1b65e291975717f]           ID  NaN      NaN          NaN     NaN
+1       product_category_name    object         610            1.9%            73              0.2%                                                                      [perfumaria, artes, esporte_lazer]  Categorical  NaN      NaN          NaN     NaN
+2         product_name_lenght   float64         610            1.9%            66              0.2%                                                                                                     NaN      Numeric  5.0     76.0    48.476949    51.0
+3  product_description_lenght   float64         610            1.9%          2960              9.0%                                                                                                     NaN      Numeric  4.0   3992.0   771.495285   595.0
+4          product_photos_qty   float64         610            1.9%            19              0.1%                                                                                                     NaN      Numeric  1.0     20.0     2.188986     1.0
+5            product_weight_g   float64           2            0.0%          2204              6.7%                                                                                                     NaN      Numeric  0.0  40425.0  2276.472488   700.0
+6           product_length_cm   float64           2            0.0%            99              0.3%                                                                                                     NaN      Numeric  7.0    105.0    30.815078    25.0
+7           product_height_cm   float64           2            0.0%           102              0.3%                                                                                                     NaN      Numeric  2.0    105.0    16.937661    13.0
+8            product_width_cm   float64           2            0.0%            95              0.3%                                                                                                     NaN      Numeric  6.0    118.0    23.196728    20.0
+
+────────────────────────────────────────────────────────────
+CATEGORICAL COLUMNS
+────────────────────────────────────────────────────────────
+Found 1 categorical columns suitable for analysis:
+  • product_category_name
+{'product_category_name': array(['perfumaria', 'artes', 'esporte_lazer', 'bebes',
+       'utilidades_domesticas'], dtype=object)}
+
+================================================================================
+DATAFRAME EXPLORATION REPORT - PRODUCT_CATEGORY_NAME_TRANSLATION
+================================================================================
+
+Dataset shape: 71 rows × 2 columns
+Memory usage: 0.01 MB
+
+────────────────────────────────────────────────────────────
+DETAILED COLUMN ANALYSIS
+────────────────────────────────────────────────────────────
+
+============================================================
+DATAFRAME STRUCTURE ANALYSIS
+============================================================
+
+Total columns: 2
+Total rows: 71
+
+Column type distribution:
+likely_type
+Unique Text    2
+Name: count, dtype: int64
+
+Column Details:
+                     column_name data_type  null_count null_percentage  unique_count unique_percentage                                       sample_values  likely_type
+0          product_category_name    object           0            0.0%            71            100.0%  [beleza_saude, informatica_acessorios, automotivo]  Unique Text
+1  product_category_name_english    object           0            0.0%            71            100.0%        [health_beauty, computers_accessories, auto]  Unique Text
+
+────────────────────────────────────────────────────────────
+CATEGORICAL COLUMNS
+────────────────────────────────────────────────────────────
+Found 0 categorical columns suitable for analysis:
+{}
+
+================================================================================
+DATAFRAME EXPLORATION REPORT - SELLERS
+================================================================================
+
+Dataset shape: 3095 rows × 4 columns
+Memory usage: 0.66 MB
+
+────────────────────────────────────────────────────────────
+DETAILED COLUMN ANALYSIS
+────────────────────────────────────────────────────────────
+
+============================================================
+DATAFRAME STRUCTURE ANALYSIS
+============================================================
+
+Total columns: 4
+Total rows: 3095
+
+Column type distribution:
+likely_type
+Categorical    2
+ID             1
+Numeric        1
+Name: count, dtype: int64
+
+Column Details:
+              column_name data_type  null_count null_percentage  unique_count unique_percentage                                                                                           sample_values  likely_type     min      max          mean   median
+0               seller_id    object           0            0.0%          3095            100.0%  [3442f8959a84dea7ee197c632cb2df15, d1b65fc7debc3361ea86b5f14c68d2e2, ce3ad9de960102d0677a81f5d0bb7b2d]           ID     NaN      NaN           NaN      NaN
+1  seller_zip_code_prefix     int64           0            0.0%          2246             72.6%                                                                                                     NaN      Numeric  1001.0  99730.0  32291.059451  14940.0
+2             seller_city    object           0            0.0%           611             19.7%                                                                  [campinas, mogi guacu, rio de janeiro]  Categorical     NaN      NaN           NaN      NaN
+3            seller_state    object           0            0.0%            23              0.7%                                                                                            [SP, SP, RJ]  Categorical     NaN      NaN           NaN      NaN
+
+────────────────────────────────────────────────────────────
+CATEGORICAL COLUMNS
+────────────────────────────────────────────────────────────
+Found 2 categorical columns suitable for analysis:
+  • seller_city
+  • seller_state
+{'seller_city': array(['campinas', 'mogi guacu', 'rio de janeiro', 'sao paulo',
+       'braganca paulista'], dtype=object), 'seller_state': array(['SP', 'RJ', 'PE', 'PR', 'GO'], dtype=object)}
+
+================================================================================
+DATAFRAME EXPLORATION REPORT - GEOLOCATION
+================================================================================
+
+Dataset shape: 1000163 rows × 5 columns
+Memory usage: 146.09 MB
+
+────────────────────────────────────────────────────────────
+DETAILED COLUMN ANALYSIS
+────────────────────────────────────────────────────────────
+
+============================================================
+DATAFRAME STRUCTURE ANALYSIS
+============================================================
+
+Total columns: 5
+Total rows: 1000163
+
+Column type distribution:
+likely_type
+Numeric        3
+Categorical    2
+Name: count, dtype: int64
+
+Column Details:
+                   column_name data_type  null_count null_percentage  unique_count unique_percentage          min           max          mean        median  likely_type                      sample_values
+0  geolocation_zip_code_prefix     int64           0            0.0%         19015              1.9%  1001.000000  99990.000000  36574.166466  26530.000000      Numeric                                NaN
+1              geolocation_lat   float64           0            0.0%        717360             71.7%   -36.605374     45.065933    -21.176153    -22.919377      Numeric                                NaN
+2              geolocation_lng   float64           0            0.0%        717613             71.7%  -101.466766    121.105394    -46.390541    -46.637879      Numeric                                NaN
+3             geolocation_city    object           0            0.0%          8011              0.8%          NaN           NaN           NaN           NaN  Categorical  [sao paulo, sao paulo, sao paulo]
+4            geolocation_state    object           0            0.0%            27              0.0%          NaN           NaN           NaN           NaN  Categorical                       [SP, SP, SP]
+
+────────────────────────────────────────────────────────────
+CATEGORICAL COLUMNS
+────────────────────────────────────────────────────────────
+Found 2 categorical columns suitable for analysis:
+  • geolocation_city
+  • geolocation_state
+{'geolocation_city': array(['sao paulo', 'são paulo', 'sao bernardo do campo', 'jundiaí',
+       'taboão da serra'], dtype=object), 'geolocation_state': array(['SP', 'RN', 'AC', 'RJ', 'ES'], dtype=object)}
+
+================================================================================
+DATAFRAME EXPLORATION REPORT - LEADS_QUALIFIED
+================================================================================
+
+Dataset shape: 8000 rows × 4 columns
+Memory usage: 1.93 MB
+
+────────────────────────────────────────────────────────────
+DETAILED COLUMN ANALYSIS
+────────────────────────────────────────────────────────────
+
+============================================================
+DATAFRAME STRUCTURE ANALYSIS
+============================================================
+
+Total columns: 4
+Total rows: 8000
+
+Column type distribution:
+likely_type
+ID             2
+DateTime       1
+Categorical    1
+Name: count, dtype: int64
+
+Column Details:
+          column_name       data_type  null_count null_percentage  unique_count unique_percentage                                                                                           sample_values  likely_type
+0              mql_id          object           0            0.0%          8000            100.0%  [dac32acd4db4c29c230538b72f8dd87d, 8c18d1de7f67e60dbd64e3c07d7e9d5d, b4bc852d233dfefc5131f593b538befa]           ID
+1  first_contact_date  datetime64[ns]           0            0.0%           336              4.2%                                                                                                     NaN     DateTime
+2     landing_page_id          object           0            0.0%           495              6.2%  [88740e65d5d6b056e0cda098e1ea6313, 007f9098284a86ee80ddeb25d53e0af8, a7982125ff7aa3b2054c6e44f9d28522]           ID
+3              origin          object          60            0.8%            10              0.1%                                                                   [social, paid_search, organic_search]  Categorical
+
+────────────────────────────────────────────────────────────
+CATEGORICAL COLUMNS
+────────────────────────────────────────────────────────────
+Found 1 categorical columns suitable for analysis:
+  • origin
+{'origin': array(['social', 'paid_search', 'organic_search', 'email', 'unknown'],
+      dtype=object)}
+
+================================================================================
+DATAFRAME EXPLORATION REPORT - LEADS_CLOSED
+================================================================================
+
+Dataset shape: 842 rows × 14 columns
+Memory usage: 0.55 MB
+
+────────────────────────────────────────────────────────────
+DETAILED COLUMN ANALYSIS
+────────────────────────────────────────────────────────────
+
+============================================================
+DATAFRAME STRUCTURE ANALYSIS
+============================================================
+
+Total columns: 14
+Total rows: 842
+
+Column type distribution:
+likely_type
+Categorical    5
+ID             4
+Numeric        4
+DateTime       1
+Name: count, dtype: int64
+
+Column Details:
+                      column_name       data_type  null_count null_percentage  unique_count unique_percentage                                                                                           sample_values  likely_type  min         max          mean  median
+0                          mql_id          object           0            0.0%           842            100.0%  [5420aad7fec3549a85876ba1c529bd84, a555fb36b9368110ede0f043dfc3b9a0, 327174d3648a2d047e8940d7d15204ca]           ID  NaN         NaN           NaN     NaN
+1                       seller_id          object           0            0.0%           842            100.0%  [2c43fb513632d29b3b58df74816f1b06, bbb7d7893a450660432ea6652310ebb7, 612170e34b97004b3ba37eae81836b4c]           ID  NaN         NaN           NaN     NaN
+2                          sdr_id          object           0            0.0%            32              3.8%  [a8387c01a09e99ce014107505b92388c, 09285259593c61296eef10c734121d5b, b90f87164b5f8c2cfa5c8572834dbe3f]           ID  NaN         NaN           NaN     NaN
+3                           sr_id          object           0            0.0%            22              2.6%  [4ef15afb4b2723d8f3d81e51ec7afefe, d3d1e91a157ea7f90548eef82f1955e3, 6565aa9ce3178a5caf6171827af3a9ba]           ID  NaN         NaN           NaN     NaN
+4                        won_date  datetime64[ns]           0            0.0%           824             97.9%                                                                                                     NaN     DateTime  NaN         NaN           NaN     NaN
+5                business_segment          object           1            0.1%            33              3.9%                                                                 [pet, car_accessories, home_appliances]  Categorical  NaN         NaN           NaN     NaN
+6                       lead_type          object           6            0.7%             8              1.0%                                                                   [online_medium, industry, online_big]  Categorical  NaN         NaN           NaN     NaN
+7          lead_behaviour_profile          object         177           21.0%             9              1.1%                                                                                       [cat, eagle, cat]  Categorical  NaN         NaN           NaN     NaN
+8                     has_company         float64         779           92.5%             2              0.2%                                                                                                     NaN      Numeric  0.0         1.0      0.920635     1.0
+9                        has_gtin         float64         778           92.4%             2              0.2%                                                                                                     NaN      Numeric  0.0         1.0      0.843750     1.0
+10                  average_stock          object         776           92.2%             6              0.7%                                                                                     [20-50, 20-50, 1-5]  Categorical  NaN         NaN           NaN     NaN
+11                  business_type          object          10            1.2%             3              0.4%                                                                          [reseller, reseller, reseller]  Categorical  NaN         NaN           NaN     NaN
+12  declared_product_catalog_size         float64         773           91.8%            33              3.9%                                                                                                     NaN      Numeric  1.0      2000.0    233.028986   100.0
+13       declared_monthly_revenue         float64           0            0.0%            27              3.2%                                                                                                     NaN      Numeric  0.0  50000000.0  73377.679335     0.0
+
+────────────────────────────────────────────────────────────
+CATEGORICAL COLUMNS
+────────────────────────────────────────────────────────────
+Found 5 categorical columns suitable for analysis:
+  • business_segment
+  • lead_type
+  • lead_behaviour_profile
+  • average_stock
+  • business_type
+{'business_segment': array(['pet', 'car_accessories', 'home_appliances', 'food_drink',
+       'health_beauty'], dtype=object), 'lead_type': array(['online_medium', 'industry', 'online_big', 'online_small',
+       'offline'], dtype=object), 'lead_behaviour_profile': array(['cat', 'eagle', 'wolf', 'shark', 'cat, wolf'], dtype=object), 'average_stock': array(['20-50', '1-5', '5-20', '200+', '50-200'], dtype=object), 'business_type': array(['reseller', 'manufacturer', 'other'], dtype=object)}

@@ -331,10 +331,13 @@ def explore_dataframe(df, name, detailed=False):
         print(f"  • {col}")
     
     # Print unique values for categorical columns
-    if categorical_cols:
-        unique_values = print_unique_values(df[categorical_cols])
-    
-    return categorical_cols
+    dict_categorical = dict()
+    for col in categorical_cols:
+        unique_values = df[col].dropna().unique()
+        dict_categorical[col] = unique_values[:5]
+
+    print(dict_categorical)
+    return dict_categorical
 
 
 

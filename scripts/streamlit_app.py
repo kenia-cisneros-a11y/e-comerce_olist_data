@@ -35,7 +35,7 @@ def load_data():
     leads_qualified_df = load_table('leads_qualified')
     leads_closed_df = load_table('leads_closed')
 
-    # basic preprocessing
+    # basic preprocessing date columns
     orders_df['order_purchase_timestamp'] = pd.to_datetime(orders_df['order_purchase_timestamp'])
     orders_df['order_approved_at'] = pd.to_datetime(orders_df['order_approved_at'])
     orders_df['order_delivered_carrier_date'] = pd.to_datetime(orders_df['order_delivered_carrier_date'])
@@ -49,6 +49,19 @@ def load_data():
 
     leads_qualified_df['first_contact_date'] = pd.to_datetime(leads_qualified_df['first_contact_date'])
     leads_closed_df['won_date'] = pd.to_datetime(leads_closed_df['won_date'])
+
+    # basic preprocessing categorical columns
+    product_category_name_translation_df['product_category_name_english'] = product_category_name_translation_df['product_category_name_english'].apply(lambda x: x.upper().replace('_', ' '))
+    orders_df['order_status'] = orders_df['order_status'].apply(lambda x: x.upper())
+    order_payments_df['payment_type'] = order_payments_df['payment_type'].apply(lambda x: x.upper().replace('_', ' '))
+    products_df['product_category_name'] = products_df['product_category_name'].apply(lambda x: x.upper().replace('_', ' '))
+    sellers_df['seller_city'] = sellers_df['seller_city'].apply(lambda x: x.upper())
+    geolocation_df['geolocation_city'] = geolocation_df['geolocation_city'].apply(lambda x: x.upper())
+    leads_qualified_df['origin'] = leads_qualified_df['origin'].apply(lambda x: x.upper().replace('_', ' '))
+    leads_closed_df['business_segment'] = leads_closed_df['business_segment'].apply(lambda x: x.upper().replace('_', ' '))
+    leads_closed_df['lead_type'] = leads_closed_df['lead_type'].apply(lambda x: x.upper().replace('_', ' '))
+    leads_closed_df['lead_behaviour_profile'] = leads_closed_df['lead_behaviour_profile'].apply(lambda x: x.upper().replace('_', ' '))
+    leads_closed_df['business_type'] = leads_closed_df['business_type'].apply(lambda x: x.upper().replace('_', ' '))
     
     return orders_df, order_payments_df, customers_df, products_df, order_items_df, order_reviews_df, product_category_name_translation_df, sellers_df, geolocation_df, leads_qualified_df, leads_closed_df
 
