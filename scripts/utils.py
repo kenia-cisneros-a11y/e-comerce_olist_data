@@ -2,14 +2,37 @@ import pandas as pd
 import sqlite3
 import numpy as np
 # from ydata_profiling import ProfileReport
+import os
+
 
 import warnings
-
-# Suppress all UserWarnings
 warnings.filterwarnings("ignore", category=UserWarning)
 
 
-db_path = 'C:/Users/kenia/OneDrive/Documents/GitHub/cobre/data/olist.sqlite'
+# Dynamic path that works both locally and on Streamlit Cloud
+def get_db_path():
+    # Try multiple possible locations
+    possible_paths = [
+        # If running from scripts folder
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'data', 'olist.sqlite'),
+        # If running from project root
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'olist.sqlite'),
+        # Direct path
+        'data/olist.sqlite',
+        # Absolute path from root
+        '/mount/src/e-comerce_olist_data/data/olist.sqlite'
+    ]
+    
+    for path in possible_paths:
+        if os.path.exists(path):
+            print(f"Database found at: {path}")
+            return path
+    
+    # If no path exists, raise an error with helpful info
+    raise FileNotFoundError(f"Database not found. Searched in: {possible_paths}")
+
+db_path = get_db_path()
+# db_path = 'C:/Users/kenia/OneDrive/Documents/GitHub/cobre/data/olist.sqlite'
 db_connection = sqlite3.connect(db_path, check_same_thread = False)
 
 def load_table(table):

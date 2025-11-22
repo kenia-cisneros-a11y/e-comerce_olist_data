@@ -1,5 +1,5 @@
 # Archivos de bases de datos grandes
-*.sqlite
+# *.sqlite
 *.db
 *.csv
 *.parquet

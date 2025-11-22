@@ -6,10 +6,14 @@ import os
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
 
-# Then import normally
-from scripts.utils import *
-from scripts.key_metrics import *
+sys.path.insert(0, parent_dir)
+sys.path.insert(0, current_dir)
+
+from utils import *
+from key_metrics import *
 import matplotlib.pyplot as plt
 
 import warnings
