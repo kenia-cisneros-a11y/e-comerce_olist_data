@@ -2,17 +2,19 @@ import streamlit as st
 import pandas as pd
 
 import sys
-sys.path.append('scripts')
+import os
 
-from utils import *
+# Add parent directory to path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+# Then import normally
+from scripts.utils import *
+from scripts.key_metrics import *
 import matplotlib.pyplot as plt
-from key_metrics import *
 
 import warnings
-
 # Suppress all UserWarnings
 warnings.filterwarnings("ignore", category=UserWarning)
-
 
 # Load data
 @st.cache_data
