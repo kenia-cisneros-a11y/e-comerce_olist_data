@@ -1,0 +1,27 @@
+# Archivos de bases de datos grandes
+*.sqlite
+*.db
+*.csv
+*.parquet
+
+# Archivos de configuración local
+.env
+*.secrets.toml
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Carpetas de entorno virtual
+venv/
+__pycache__/
+*.pyc
+
+# Archivos de logs
+*.log
+
+# Archivos de Jupyter
+.ipynb_checkpoints/
+
+# Archivos de VS Code
+.vscode/
