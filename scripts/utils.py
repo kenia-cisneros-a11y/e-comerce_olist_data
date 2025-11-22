@@ -1,7 +1,7 @@
 import pandas as pd
 import sqlite3
 import numpy as np
-from ydata_profiling import ProfileReport
+# from ydata_profiling import ProfileReport
 
 import warnings
 
@@ -12,15 +12,15 @@ warnings.filterwarnings("ignore", category=UserWarning)
 db_path = 'C:/Users/kenia/OneDrive/Documents/GitHub/cobre/data/olist.sqlite'
 db_connection = sqlite3.connect(db_path, check_same_thread = False)
 
-def load_table(table, profiling=False):
+def load_table(table):
     query = f"""
         SELECT *
         FROM {table}
     """
     df = pd.read_sql_query(query, db_connection)
-    if profiling:
-        profile = ProfileReport(df, title=f"{table} Profiling", explorative=True)
-        profile.to_file(f"data/{table}_report.html")
+    # if profiling:
+    #     profile = ProfileReport(df, title=f"{table} Profiling", explorative=True)
+    #     profile.to_file(f"data/{table}_report.html")
     return df
 
 def customer_view():
