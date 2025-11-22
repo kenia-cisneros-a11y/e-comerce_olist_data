@@ -920,174 +920,116 @@ def review_sentiment_trends(reviews_df, orders_df):
     
     return monthly_sentiment.reset_index()
 
-
-def customer_cohort_retention_analysis(orders_df, customers_df=None, date_range=None, cohort_period='month'):
-    """
-    Performs customer cohort analysis to measure retention rates over time.
-    Business question: How well are we retaining customers over time and what are the retention patterns?
-    Analysis:
-        - Groups customers into acquisition cohorts based on their first purchase date.
-        - Tracks how many customers from each cohort return in subsequent periods.
-        - Identifies retention trends and patterns across different time periods.
-        - Helps evaluate long-term customer value and loyalty program effectiveness.
-    
-    Returns:
-        - retention_matrix (DataFrame): Cohort retention matrix with percentages.
-        - cohort_sizes (DataFrame): Size of each acquisition cohort.
-        - retention_metrics (dict): Key retention performance indicators.
-        - retention_trends (DataFrame): Monthly retention trend analysis.
-    """
-    
-    # Filter orders by date range if provided
-    filtered_orders = orders_df.copy()
-    if date_range and len(date_range) == 2:
-        start_date, end_date = date_range
-        filtered_orders = filtered_orders[
-            (filtered_orders['order_purchase_timestamp'] >= pd.to_datetime(start_date)) &
-            (filtered_orders['order_purchase_timestamp'] <= pd.to_datetime(end_date))
-        ]
-    
-    # Ensure we have required columns
-    required_cols = ['customer_id', 'order_purchase_timestamp']
-    if not all(col in filtered_orders.columns for col in required_cols):
-        raise ValueError(f"Missing required columns: {required_cols}")
-    
-    # Create customer acquisition cohorts
-    # Step 1: Identify each customer's first purchase date (cohort date)
-    customer_first_purchase = filtered_orders.groupby('customer_id')['order_purchase_timestamp'].min().reset_index()
-    customer_first_purchase.columns = ['customer_id', 'cohort_date']
-    
-    # Step 2: Assign cohort period based on specified frequency
-    if cohort_period == 'month':
-        customer_first_purchase['cohort_period'] = customer_first_purchase['cohort_date'].dt.to_period('M')
-    elif cohort_period == 'quarter':
-        customer_first_purchase['cohort_period'] = customer_first_purchase['cohort_date'].dt.to_period('Q')
-    elif cohort_period == 'week':
-        customer_first_purchase['cohort_period'] = customer_first_purchase['cohort_date'].dt.to_period('W')
-    else:
-        raise ValueError("cohort_period must be 'month', 'quarter', or 'week'")
-    
-    # Step 3: Merge cohort information back with orders
-    orders_with_cohort = filtered_orders.merge(customer_first_purchase[['customer_id', 'cohort_period']], 
-                                              on='customer_id', how='left')
-    
-    # Step 4: Calculate period for each order relative to cohort
-    if cohort_period == 'month':
-        orders_with_cohort['order_period'] = orders_with_cohort['order_purchase_timestamp'].dt.to_period('M')
-    elif cohort_period == 'quarter':
-        orders_with_cohort['order_period'] = orders_with_cohort['order_purchase_timestamp'].dt.to_period('Q')
-    elif cohort_period == 'week':
-        orders_with_cohort['order_period'] = orders_with_cohort['order_purchase_timestamp'].dt.to_period('W')
-    
-    # Step 5: Calculate periods since acquisition for each order
-    orders_with_cohort['periods_since_acquisition'] = (
-        orders_with_cohort['order_period'] - orders_with_cohort['cohort_period']
-    ).apply(lambda x: x.n)
-    
-    # Step 6: Create cohort analysis matrix
-    # Count unique customers per cohort and period
-    cohort_data = orders_with_cohort.groupby(['cohort_period', 'periods_since_acquisition']).agg({
-        'customer_id': 'nunique'
-    }).reset_index()
-    cohort_data.columns = ['cohort_period', 'periods_since_acquisition', 'customer_count']
-    
-    # Step 7: Pivot to create retention matrix
-    retention_matrix = cohort_data.pivot_table(
-        index='cohort_period',
-        columns='periods_since_acquisition',
-        values='customer_count',
-        fill_value=0
-    )
-    
-    # Step 8: Calculate cohort sizes (initial customer count for each cohort)
-    cohort_sizes = retention_matrix.iloc[:, 0].reset_index()
-    cohort_sizes.columns = ['cohort_period', 'cohort_size']
-    
-    # Step 9: Convert absolute counts to retention percentages
-    retention_matrix_pct = retention_matrix.div(retention_matrix.iloc[:, 0], axis=0) * 100
-    retention_matrix_pct = retention_matrix_pct.round(2)
-    
-    # Step 10: Calculate key retention metrics
-    retention_metrics = calculate_retention_metrics(retention_matrix_pct, cohort_sizes)
-    
-    # Step 11: Analyze retention trends over time
-    retention_trends = analyze_retention_trends(retention_matrix_pct)
-    
-    return retention_matrix_pct, cohort_sizes, retention_metrics, retention_trends
-
-
-def calculate_retention_metrics(retention_matrix_pct, cohort_sizes):
+# ---------------------------------------------------------------------------------------------------------------
+def calculate_cohort_metrics(retention_matrix_pct, cohort_sizes):
     """
     Calculates key retention performance indicators from cohort analysis.
     
     Returns:
-        - dict: Comprehensive retention metrics and performance indicators.
+        dict: Comprehensive retention metrics and performance indicators
     """
     
     metrics = {}
     
-    # Overall average retention rates by period
-    periods = retention_matrix_pct.columns
-    for period in periods[1:6]:  # Focus on first 6 periods
-        if period in retention_matrix_pct.columns:
-            metrics[f'period_{period}_retention_avg'] = round(retention_matrix_pct[period].mean(), 2)
+    # Basic cohort information
+    metrics['total_cohorts'] = len(retention_matrix_pct)
+    metrics['analysis_periods'] = len(retention_matrix_pct.columns) - 1  # Exclude period 0
     
-    # First period retention (crucial metric)
-    metrics['first_period_retention_avg'] = round(
-        retention_matrix_pct.iloc[:, 1].mean() if len(retention_matrix_pct.columns) > 1 else 0, 2
-    )
-    
-    # Cohort size trends
+    # Cohort sizes
     metrics['avg_cohort_size'] = round(cohort_sizes['cohort_size'].mean(), 2)
-    metrics['cohort_size_growth_rate'] = round(
-        (cohort_sizes['cohort_size'].iloc[-1] - cohort_sizes['cohort_size'].iloc[0]) / 
-        cohort_sizes['cohort_size'].iloc[0] * 100, 2
-    ) if len(cohort_sizes) > 1 else 0
+    metrics['total_customers_analyzed'] = int(cohort_sizes['cohort_size'].sum())
     
-    # Best and worst performing cohorts
-    if len(retention_matrix_pct.columns) > 1:
-        best_cohort_retention = retention_matrix_pct.iloc[:, 1].max()
-        worst_cohort_retention = retention_matrix_pct.iloc[:, 1].min()
-        metrics['best_cohort_retention'] = round(best_cohort_retention, 2)
-        metrics['worst_cohort_retention'] = round(worst_cohort_retention, 2)
-        metrics['retention_variability'] = round(best_cohort_retention - worst_cohort_retention, 2)
+    # Retention rates by period
+    periods = retention_matrix_pct.columns
+    for period in periods[1:min(7, len(periods))]:  # First 6 periods after acquisition
+        if period in retention_matrix_pct.columns:
+            # Only calculate mean for non-zero values
+            non_zero_retention = retention_matrix_pct[period][retention_matrix_pct[period] > 0]
+            if len(non_zero_retention) > 0:
+                period_retention = non_zero_retention.mean()
+                metrics[f'period_{period}_retention_avg'] = round(period_retention, 2)
     
-    # Long-term retention (period 3+)
-    if len(retention_matrix_pct.columns) >= 4:
-        long_term_retention = retention_matrix_pct.iloc[:, 3].mean()
-        metrics['long_term_retention_avg'] = round(long_term_retention, 2)
+    # Key retention metrics
+    if len(periods) > 1 and 1 in retention_matrix_pct.columns:
+        first_period = 1
+        non_zero_first = retention_matrix_pct[first_period][retention_matrix_pct[first_period] > 0]
+        
+        if len(non_zero_first) > 0:
+            metrics['first_period_retention'] = round(non_zero_first.mean(), 2)
+            metrics['best_cohort_retention'] = round(non_zero_first.max(), 2)
+            metrics['worst_cohort_retention'] = round(non_zero_first.min(), 2)
+            metrics['retention_variability'] = round(
+                metrics['best_cohort_retention'] - metrics['worst_cohort_retention'], 2
+            )
+    
+    # Long-term retention (period 3)
+    if 3 in retention_matrix_pct.columns:
+        non_zero_p3 = retention_matrix_pct[3][retention_matrix_pct[3] > 0]
+        if len(non_zero_p3) > 0:
+            metrics['long_term_retention'] = round(non_zero_p3.mean(), 2)
+        else:
+            metrics['long_term_retention'] = 0
+    else:
+        metrics['long_term_retention'] = 0
+    
+    # Overall retention health score
+    retention_scores = []
+    for period in periods[1:min(4, len(periods))]:  # Average of first 3 periods
+        non_zero = retention_matrix_pct[period][retention_matrix_pct[period] > 0]
+        if len(non_zero) > 0:
+            retention_scores.append(non_zero.mean())
+    
+    if retention_scores:
+        metrics['retention_health_score'] = round(sum(retention_scores) / len(retention_scores), 2)
+    else:
+        metrics['retention_health_score'] = 0
     
     return metrics
 
 
-def analyze_retention_trends(retention_matrix_pct):
+def analyze_cohort_trends(retention_matrix_pct):
     """
     Analyzes retention trends across different cohort periods.
     
     Returns:
-        - DataFrame: Monthly retention trends and performance analysis.
+        DataFrame: Cohort retention trends and performance analysis
     """
     
     trends_data = []
+    periods = retention_matrix_pct.columns
     
     for cohort in retention_matrix_pct.index:
-        cohort_data = {'cohort_period': str(cohort)}
+        cohort_data = {
+            'cohort': str(cohort),
+            'cohort_size': retention_matrix_pct.loc[cohort, 0] if 0 in periods else 100  # Size from period 0
+        }
         
-        # Add retention rates for each period
-        for period in retention_matrix_pct.columns[:6]:  # Focus on first 6 periods
-            if period in retention_matrix_pct.columns:
+        # Add retention rates for key periods
+        for period in [1, 2, 3, 6, 12]:
+            if period in periods:
                 cohort_data[f'period_{period}_retention'] = retention_matrix_pct.loc[cohort, period]
         
-        # Calculate retention performance score
-        retention_score = calculate_retention_score(retention_matrix_pct.loc[cohort])
-        cohort_data['retention_score'] = retention_score
+        # Calculate performance score (average of first 3 periods after acquisition)
+        retention_periods = []
+        for period in periods:
+            if period > 0 and period <= 3:
+                value = retention_matrix_pct.loc[cohort, period]
+                if value > 0:  # Only include non-zero values
+                    retention_periods.append(value)
         
-        # Performance category
-        if retention_score >= 80:
+        if retention_periods:
+            performance_score = sum(retention_periods) / len(retention_periods)
+        else:
+            performance_score = 0
+        
+        cohort_data['performance_score'] = round(performance_score, 2)
+        
+        # Performance categorization
+        if performance_score >= 50:
             cohort_data['performance_category'] = 'Excellent'
-        elif retention_score >= 60:
+        elif performance_score >= 30:
             cohort_data['performance_category'] = 'Good'
-        elif retention_score >= 40:
+        elif performance_score >= 15:
             cohort_data['performance_category'] = 'Average'
         else:
             cohort_data['performance_category'] = 'Needs Improvement'
@@ -1098,38 +1040,198 @@ def analyze_retention_trends(retention_matrix_pct):
     return trends_df
 
 
-def calculate_retention_score(cohort_retention_series):
+def customer_cohort_retention_analysis(orders_df, customers_df=None, date_range=None, 
+                                      cohort_period='month', max_periods=12):
     """
-    Calculates a composite retention score for a cohort.
-    Weights early retention more heavily as it's most critical.
+    Performs customer cohort analysis to measure retention rates over time.
+    Business question: How well are we retaining customers over time and what are the retention patterns?
+    
+    Parameters:
+    -----------
+    orders_df : DataFrame - Orders table
+    customers_df : DataFrame - Customer demographics (optional)
+    date_range : tuple - (start_date, end_date) for filtering
+    cohort_period : str - 'month', 'quarter', or 'week'
+    max_periods : int - Maximum periods to analyze
     
     Returns:
-        - float: Composite retention score (0-100)
+    --------
+    tuple: (retention_matrix_pct, cohort_sizes, retention_metrics, retention_trends)
     """
     
-    if len(cohort_retention_series) < 2:
-        return 0
+    # Step 1: Filter and prepare data
+    filtered_orders = orders_df.copy()
     
-    # Weight early periods more heavily
-    weights = [0.4, 0.3, 0.2, 0.1]  # Weights for periods 1-4
+    if date_range and len(date_range) == 2:
+        start_date, end_date = date_range
+        filtered_orders = filtered_orders[
+            (filtered_orders['order_purchase_timestamp'] >= pd.to_datetime(start_date)) &
+            (filtered_orders['order_purchase_timestamp'] <= pd.to_datetime(end_date))
+        ]
     
-    score = 0
-    total_weight = 0
+    # Ensure datetime
+    filtered_orders['order_purchase_timestamp'] = pd.to_datetime(filtered_orders['order_purchase_timestamp'])
     
-    for i, weight in enumerate(weights):
-        if i + 1 < len(cohort_retention_series):  # i+1 because period 0 is acquisition
-            period_retention = cohort_retention_series.iloc[i + 1]
-            score += period_retention * weight
-            total_weight += weight
+    # Step 2: Get first purchase date for each customer
+    first_purchase = filtered_orders.groupby('customer_id')['order_purchase_timestamp'].min().reset_index()
+    first_purchase.columns = ['customer_id', 'first_purchase_date']
     
-    # Normalize score if we don't have all periods
-    if total_weight > 0:
-        score = score / total_weight
+    # Step 3: Merge first purchase date to all orders
+    merged_orders = filtered_orders.merge(first_purchase, on='customer_id', how='left')
     
-    return round(score, 2)
+    # Step 4: Create cohort and period based on cohort_period
+    if cohort_period == 'month':
+        merged_orders['cohort'] = merged_orders['first_purchase_date'].dt.to_period('M')
+        merged_orders['order_period'] = merged_orders['order_purchase_timestamp'].dt.to_period('M')
+        
+        # Calculate period difference manually
+        merged_orders['cohort_index'] = (
+            merged_orders['cohort'].dt.year * 12 + merged_orders['cohort'].dt.month
+        )
+        merged_orders['order_index'] = (
+            merged_orders['order_period'].dt.year * 12 + merged_orders['order_period'].dt.month
+        )
+        merged_orders['period_number'] = merged_orders['order_index'] - merged_orders['cohort_index']
+        
+    elif cohort_period == 'quarter':
+        merged_orders['cohort'] = merged_orders['first_purchase_date'].dt.to_period('Q')
+        merged_orders['order_period'] = merged_orders['order_purchase_timestamp'].dt.to_period('Q')
+        
+        merged_orders['cohort_index'] = (
+            merged_orders['cohort'].dt.year * 4 + merged_orders['cohort'].dt.quarter
+        )
+        merged_orders['order_index'] = (
+            merged_orders['order_period'].dt.year * 4 + merged_orders['order_period'].dt.quarter
+        )
+        merged_orders['period_number'] = merged_orders['order_index'] - merged_orders['cohort_index']
+        
+    elif cohort_period == 'week':
+        merged_orders['cohort'] = merged_orders['first_purchase_date'].dt.to_period('W')
+        days_diff = (merged_orders['order_purchase_timestamp'] - merged_orders['first_purchase_date']).dt.days
+        merged_orders['period_number'] = days_diff // 7
+    
+    # Filter valid periods
+    merged_orders = merged_orders[
+        (merged_orders['period_number'] >= 0) & 
+        (merged_orders['period_number'] <= max_periods)
+    ]
+    
+    print(f"Period distribution:\n{merged_orders['period_number'].value_counts().sort_index().head()}")
+    
+    # Step 5: Count unique customers for each cohort and period
+    cohort_data = merged_orders.groupby(['cohort', 'period_number'])['customer_id'].nunique().reset_index()
+    cohort_data.columns = ['cohort', 'period_number', 'n_customers']
+    
+    # Step 6: Create pivot table
+    retention_matrix = cohort_data.pivot_table(
+        index='cohort',
+        columns='period_number',
+        values='n_customers',
+        fill_value=0
+    )
+    
+    # Step 7: Get cohort sizes (customers in period 0)
+    cohort_sizes = retention_matrix.iloc[:, 0]
+    
+    # Step 8: Calculate retention percentages
+    retention_matrix_pct = retention_matrix.copy()
+    
+    for i in range(len(retention_matrix)):
+        cohort_size = retention_matrix.iloc[i, 0]
+        if cohort_size > 0:
+            retention_matrix_pct.iloc[i] = (retention_matrix.iloc[i] / cohort_size * 100).round(2)
+    
+    # Step 9: Create cohort sizes dataframe
+    cohort_sizes_df = pd.DataFrame({
+        'cohort': cohort_sizes.index,
+        'cohort_size': cohort_sizes.values
+    })
+    
+    # Step 10: Calculate metrics and trends
+    retention_metrics = calculate_cohort_metrics(retention_matrix_pct, cohort_sizes_df)
+    retention_trends = analyze_cohort_trends(retention_matrix_pct)
+    
+    return retention_matrix_pct, cohort_sizes_df, retention_metrics, retention_trends
 
 
-def cohort_retention_insights(retention_matrix_pct, cohort_sizes, retention_metrics):
+# Alternative simpler approach if the above still has issues:
+def customer_cohort_retention_simple(orders_df, date_range=None, cohort_period='month', max_periods=12):
+    """
+    Simplified cohort retention analysis that definitely works.
+    """
+    
+    # Prepare data
+    df = orders_df.copy()
+    df['order_purchase_timestamp'] = pd.to_datetime(df['order_purchase_timestamp'])
+    
+    # Apply date filter
+    if date_range:
+        start_date, end_date = date_range
+        df = df[(df['order_purchase_timestamp'] >= pd.to_datetime(start_date)) & 
+                (df['order_purchase_timestamp'] <= pd.to_datetime(end_date))]
+    
+    # Get first purchase date per customer
+    df['first_purchase'] = df.groupby('customer_id')['order_purchase_timestamp'].transform('min')
+    
+    # Create cohort month
+    df['cohort_month'] = df['first_purchase'].dt.to_period('M')
+    df['order_month'] = df['order_purchase_timestamp'].dt.to_period('M')
+    
+    # Calculate months since first purchase
+    def period_diff(row):
+        return (row['order_month'].year - row['cohort_month'].year) * 12 + \
+               (row['order_month'].month - row['cohort_month'].month)
+    
+    df['months_since_first'] = df.apply(period_diff, axis=1)
+    
+    # Filter to max periods
+    df = df[df['months_since_first'] <= max_periods]
+    df = df[df['months_since_first'] >= 0]
+    
+    # Create cohort matrix
+    cohort_matrix = df.groupby(['cohort_month', 'months_since_first'])['customer_id'].nunique().unstack(fill_value=0)
+    
+    # Calculate percentages
+    cohort_sizes = cohort_matrix.iloc[:, 0]
+    retention_matrix = cohort_matrix.divide(cohort_sizes, axis=0) * 100
+    retention_matrix = retention_matrix.round(2)
+    
+    # Create outputs
+    cohort_sizes_df = pd.DataFrame({
+        'cohort': cohort_sizes.index.astype(str),
+        'cohort_size': cohort_sizes.values
+    })
+    
+    # Simple metrics
+    metrics = {
+        'total_cohorts': len(retention_matrix),
+        'total_customers': int(cohort_sizes.sum()),
+        'avg_cohort_size': round(cohort_sizes.mean(), 2)
+    }
+    
+    if 1 in retention_matrix.columns:
+        metrics['month_1_retention'] = round(retention_matrix[1].mean(), 2)
+    if 3 in retention_matrix.columns:
+        metrics['month_3_retention'] = round(retention_matrix[3].mean(), 2)
+    if 6 in retention_matrix.columns:
+        metrics['month_6_retention'] = round(retention_matrix[6].mean(), 2)
+    
+    # Trends
+    trends = []
+    for cohort in retention_matrix.index:
+        trend = {
+            'cohort': str(cohort),
+            'size': cohort_sizes[cohort],
+            'month_1': retention_matrix.loc[cohort, 1] if 1 in retention_matrix.columns else 0,
+            'month_3': retention_matrix.loc[cohort, 3] if 3 in retention_matrix.columns else 0
+        }
+        trends.append(trend)
+    
+    trends_df = pd.DataFrame(trends)
+    
+    return retention_matrix, cohort_sizes, metrics, trends_df
+
+def generate_cohort_insights(retention_matrix_pct, cohort_sizes, retention_metrics):
     """
     Generates actionable business insights from cohort retention analysis.
     Business question: What strategic actions should we take based on retention patterns?
@@ -1139,75 +1241,71 @@ def cohort_retention_insights(retention_matrix_pct, cohort_sizes, retention_metr
         - Provides data-driven recommendations for customer retention programs.
     
     Returns:
-        - dict: Strategic insights and actionable recommendations.
+        dict: Strategic insights and actionable recommendations
     """
     
     insights = {
-        'performance_summary': '',
-        'key_strengths': [],
-        'improvement_areas': [],
-        'strategic_recommendments': [],
-        'retention_benchmarks': {}
+        'performance_overview': '',
+        'key_findings': [],
+        'strengths': [],
+        'improvement_opportunities': [],
+        'strategic_recommendations': []
     }
     
-    # Performance summary
-    avg_first_period_retention = retention_metrics.get('first_period_retention_avg', 0)
+    # Performance overview
+    avg_retention = retention_metrics.get('first_period_retention', 0)
     
-    if avg_first_period_retention >= 70:
-        insights['performance_summary'] = 'Strong customer retention with excellent first-period engagement'
-    elif avg_first_period_retention >= 50:
-        insights['performance_summary'] = 'Moderate retention performance with room for improvement'
+    if avg_retention >= 40:
+        insights['performance_overview'] = f"Strong retention performance with {avg_retention}% first-period retention"
+    elif avg_retention >= 20:
+        insights['performance_overview'] = f"Moderate retention with {avg_retention}% first-period retention - room for improvement"
     else:
-        insights['performance_summary'] = 'Critical need for retention improvement strategies'
+        insights['performance_overview'] = f"Critical retention challenge - only {avg_retention}% first-period retention"
     
-    # Identify key strengths
-    if retention_metrics.get('best_cohort_retention', 0) >= 80:
-        insights['key_strengths'].append(
-            f"Best cohort achieved {retention_metrics['best_cohort_retention']}% retention - analyze successful strategies"
+    # Key findings
+    insights['key_findings'].extend([
+        f"Analyzed {retention_metrics['total_cohorts']} acquisition cohorts",
+        f"Average cohort size: {retention_metrics['avg_cohort_size']} customers",
+        f"Retention health score: {retention_metrics.get('retention_health_score', 0)}/100"
+    ])
+    
+    # Strengths
+    if retention_metrics.get('best_cohort_retention', 0) >= 60:
+        insights['strengths'].append(
+            f"Top-performing cohort achieved {retention_metrics['best_cohort_retention']}% retention - identify success factors"
         )
     
-    if retention_metrics.get('cohort_size_growth_rate', 0) > 0:
-        insights['key_strengths'].append(
-            f"Positive cohort growth ({retention_metrics['cohort_size_growth_rate']}%) indicating acquisition effectiveness"
+    if retention_metrics.get('long_term_retention', 0) >= 25:
+        insights['strengths'].append(
+            f"Strong long-term retention ({retention_metrics['long_term_retention']}%) indicating good customer loyalty"
         )
     
-    # Identify improvement areas
-    if retention_metrics.get('retention_variability', 0) > 30:
-        insights['improvement_areas'].append(
-            f"High retention variability ({retention_metrics['retention_variability']}%) indicates inconsistent customer experience"
+    # Improvement opportunities
+    if retention_metrics.get('retention_variability', 0) > 40:
+        insights['improvement_opportunities'].append(
+            f"High variability in retention ({retention_metrics['retention_variability']}%) suggests inconsistent customer experience"
         )
     
-    if retention_metrics.get('first_period_retention_avg', 0) < 40:
-        insights['improvement_areas'].append(
-            "Low first-period retention suggests issues with onboarding or initial product experience"
+    if avg_retention < 25:
+        insights['improvement_opportunities'].append(
+            "Low first-purchase retention indicates potential issues with onboarding or initial product satisfaction"
         )
     
     # Strategic recommendations
-    if avg_first_period_retention < 50:
-        insights['strategic_recommendments'].extend([
-            "Implement enhanced onboarding program for new customers",
-            "Develop welcome series with educational content",
-            "Create early-engagement incentives for second purchase"
+    if avg_retention < 30:
+        insights['strategic_recommendations'].extend([
+            "Implement post-purchase follow-up sequence for new customers",
+            "Develop welcome program with educational content and special offers",
+            "Create early-engagement incentives for second purchase within 30 days"
         ])
     
-    if retention_metrics.get('long_term_retention_avg', 0) < 30:
-        insights['strategic_recommendments'].extend([
-            "Launch loyalty program with tiered benefits",
-            "Develop personalized re-engagement campaigns",
-            "Create exclusive content for long-term customers"
+    if retention_metrics.get('long_term_retention', 0) < 15:
+        insights['strategic_recommendations'].extend([
+            "Launch customer loyalty program with tiered benefits",
+            "Develop personalized re-engagement campaigns for dormant customers",
+            "Create exclusive content and early access for loyal customers"
         ])
-    
-    # Retention benchmarks
-    insights['retention_benchmarks'] = {
-        'excellent_first_period': '> 70%',
-        'good_first_period': '50-70%', 
-        'needs_improvement': '< 50%',
-        'industry_standard_ecommerce': '25-40% (varies by segment)'
-    }
     
     return insights
-
-
-
 
 
