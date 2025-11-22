@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-from utils import *
+from scripts.utils import *
 import matplotlib.pyplot as plt
 from key_metrics import *
 
