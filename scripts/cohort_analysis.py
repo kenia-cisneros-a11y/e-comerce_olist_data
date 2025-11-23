@@ -480,7 +480,7 @@ def display_cohort_analysis_streamlit(analysis_results):
     visualizations = analysis_results['visualizations']
     insights = analysis_results['insights']
     retention_matrix = analysis_results['retention_matrix']
-    
+
     # Display header metrics
     col1, col2, col3, col4 = st.columns(4)
     

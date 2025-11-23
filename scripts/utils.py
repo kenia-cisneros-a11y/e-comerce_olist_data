@@ -339,7 +339,15 @@ def explore_dataframe(df, name, detailed=False):
     print(dict_categorical)
     return dict_categorical
 
-
+def format_large_number(n):
+    if n >= 1_000_000_000:
+        return f"{n / 1_000_000_000:.1f}B"
+    elif n >= 1_000_000:
+        return f"{n / 1_000_000:.1f}M"
+    elif n >= 1_000:
+        return f"{n / 1_000:.1f}K"
+    else:
+        return f"{n:,}"
 
 
 

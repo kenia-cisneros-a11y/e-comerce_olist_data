@@ -2,6 +2,7 @@
 
 import pandas as pd
 import warnings
+import numpy as np
 import re
 from collections import Counter
 
@@ -516,24 +517,27 @@ def customer_lifetime_value(orders_df, order_payments_df, customers_df=None,
     # Calculate average purchase frequency (purchases per month)
     customer_purchases['customer_age_days'] = (
         customer_purchases['last_purchase'] - customer_purchases['first_purchase']
-    ).dt.days + 1
-    
+    ).dt.days
+
     customer_purchases['customer_age_months'] = customer_purchases['customer_age_days'] / 30
-    customer_purchases['purchase_frequency'] = (
-        customer_purchases['purchase_count'] / customer_purchases['customer_age_months']
-    ).fillna(0)
-    
-    # Predict future value
-    customer_purchases['predicted_purchases'] = (
-        customer_purchases['purchase_frequency'] * months_ahead
+
+    customer_purchases['purchase_frequency'] = np.where(
+        customer_purchases['purchase_count'] > 1,
+        customer_purchases['purchase_count'] / customer_purchases['customer_age_months'],
+        0
     )
+    customer_purchases['predicted_purchases'] = (
+            customer_purchases['purchase_frequency'] * 3
+        )
     customer_purchases['predicted_clv'] = (
         customer_purchases['predicted_purchases'] * customer_purchases['avg_order_value']
     )
     
     # Categorize CLV tiers
     def clv_tier(value):
-        if value >= customer_purchases['predicted_clv'].quantile(0.8):
+        if value == 0:
+            return 'No Value'
+        elif value >= customer_purchases['predicted_clv'].quantile(0.8):
             return 'High Value'
         elif value >= customer_purchases['predicted_clv'].quantile(0.5):
             return 'Medium Value'

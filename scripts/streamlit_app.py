@@ -24,6 +24,7 @@ from cohort_analysis import (
     display_cohort_analysis_streamlit
 )
 from rfm_visualization import display_rfm_analysis_tab
+from customer_lifetime_value_visualization import display_clv_analysis_tab
 
 # Page config
 st.set_page_config(
@@ -204,25 +205,33 @@ st.markdown("---")
 # SECTION 1: KEY METRICS (GENERAL)
 st.header("🎯 Overall Performance Metrics")
 
-col1, col2, col3, col4 = st.columns(4)
+col1, col2, col3, col4, col5 = st.columns(5)
 
 with col1:
-    total_orders = filtered_orders['order_id'].nunique()
+    revenue = filtered_payments[filtered_payments['order_id'].isin(filtered_orders['order_id'])]['payment_value'].sum()
     st.metric(
-        label="📦 Total Orders",
-        value=f"{total_orders:,}",
+        label="💰 Revenue",
+        value=f"${format_large_number(revenue)}",
         delta=None
     )
 
 with col2:
-    avg_price = filtered_payments[filtered_payments['order_id'].isin(filtered_orders['order_id'])]['payment_value'].mean()
+    total_orders = filtered_orders['order_id'].nunique()
     st.metric(
-        label="💰 Average Order Value",
-        value=f"${avg_price:.2f}" if not pd.isna(avg_price) else "$0.00",
+        label="📦 Total Orders",
+        value=f"{format_large_number(total_orders)}",
         delta=None
     )
 
 with col3:
+    avg_price = filtered_payments[filtered_payments['order_id'].isin(filtered_orders['order_id'])]['payment_value'].mean()
+    st.metric(
+        label="💸 Average Order Value",
+        value=f"${avg_price:.2f}" if not pd.isna(avg_price) else "$0.00",
+        delta=None
+    )
+
+with col4:
     # Calculate success rate (delivered orders)
     delivered_orders = filtered_orders[filtered_orders['order_status'] == 'DELIVERED']['order_id'].nunique()
     success_rate = (delivered_orders / total_orders * 100) if total_orders > 0 else 0
@@ -232,7 +241,7 @@ with col3:
         delta=None
     )
 
-with col4:
+with col5:
     # Calculate cancellation rate
     cancelled_orders = filtered_orders[filtered_orders['order_status'] == 'CANCELED']['order_id'].nunique()
     cancel_rate = (cancelled_orders / total_orders * 100) if total_orders > 0 else 0
@@ -508,10 +517,11 @@ st.markdown("---")
 # SECTION 6: DETAILED INSIGHTS
 st.header("📈 Detailed Performance Insights")
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Temporal Trends", 
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📊 Temporal Trends", 
                             "🚚 Delivery Performance",
                             "🔄 Cohort Analysis", 
                             "👥 RFM Segmentation",
+                            "💰 Lifetime Value",
                             "💡 Key Recommendations",
                             ])
 
@@ -571,6 +581,20 @@ with tab2:
 
 with tab3:
     st.subheader("Customer Retention Cohort Analysis")
+
+    # Add description
+    with st.expander("ℹ️ What is Cohort Analysis?"):
+        st.write("""
+        **Cohort Analysis** helps understand customer retention patterns by grouping customers 
+        based on their first purchase date and tracking their behavior over time.
+        
+        **Key Benefits:**
+        - 📊 Track customer retention over time
+        - 💰 Measure revenue retention by cohort
+        - 🎯 Identify successful acquisition periods
+        - 📈 Predict future customer behavior
+        - 🔍 Discover retention patterns and trends
+        """)
     
     # Quick config in columns
     col1, col2 = st.columns(2)
@@ -587,6 +611,8 @@ with tab3:
             format_func=lambda x: 'Customers' if x == 'customers' else 'Revenue',
             horizontal=True
         )
+
+
     
     # Run analysis
     if st.button("Analyze Cohorts"):
@@ -613,9 +639,13 @@ with tab4:
         customer_state=customer_state,  # From sidebar filters
         payment_method=payment_method,  # From sidebar filters  
         product_category=product_category  # From sidebar filters
-    )     
+    )   
 
 with tab5:
+    display_clv_analysis_tab(filtered_orders, filtered_payments, customers, 
+                            date_range, customer_state, payment_method, product_category)
+
+with tab6:
     st.subheader("🎯 Strategic Recommendations")
     
     # Generate insights based on metrics

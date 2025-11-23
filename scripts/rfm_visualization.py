@@ -161,17 +161,9 @@ def display_rfm_analysis_tab(orders_df, order_payments_df, customers_df=None,
 def display_rfm_metrics(rfm_df, segment_summary):
     """Display key RFM metrics in metric cards"""
     
-    col1, col2, col3, col4, col5 = st.columns(5)
+    col1, col2, col3 = st.columns(3)
     
     with col1:
-        total_customers = len(rfm_df)
-        st.metric(
-            "👥 Total Customers",
-            f"{total_customers:,}",
-            help="Total unique customers analyzed"
-        )
-    
-    with col2:
         avg_recency = rfm_df['recency'].mean()
         st.metric(
             "📅 Avg Recency",
@@ -179,7 +171,7 @@ def display_rfm_metrics(rfm_df, segment_summary):
             help="Average days since last purchase"
         )
     
-    with col3:
+    with col2:
         avg_frequency = rfm_df['frequency'].mean()
         st.metric(
             "🔄 Avg Frequency",
@@ -187,15 +179,8 @@ def display_rfm_metrics(rfm_df, segment_summary):
             help="Average number of purchases per customer"
         )
     
-    with col4:
-        total_revenue = rfm_df['monetary'].sum()
-        st.metric(
-            "💰 Total Revenue",
-            f"${total_revenue:,.0f}",
-            help="Total revenue from all customers"
-        )
-    
-    with col5:
+    with col3:
+        total_customers = rfm_df['customer_id'].nunique()
         champions_count = len(rfm_df[rfm_df['segment'] == 'Champions'])
         champions_pct = (champions_count / total_customers * 100) if total_customers > 0 else 0
         st.metric(
