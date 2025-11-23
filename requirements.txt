@@ -1,3 +1,6 @@
+# for streamlit clode deployment
+pip>=25.0
+
 # Core dependencies
 streamlit
 pandas
