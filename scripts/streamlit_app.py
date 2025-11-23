@@ -19,6 +19,11 @@ sys.path.insert(0, current_dir)
 
 from utils import *
 from key_metrics import *
+from cohort_analysis import (
+    cohort_analysis_dashboard, 
+    display_cohort_analysis_streamlit
+)
+from rfm_visualization import display_rfm_analysis_tab
 
 # Page config
 st.set_page_config(
@@ -503,7 +508,12 @@ st.markdown("---")
 # SECTION 6: DETAILED INSIGHTS
 st.header("📈 Detailed Performance Insights")
 
-tab1, tab2, tab3 = st.tabs(["📊 Temporal Trends", "🚚 Delivery Performance", "💡 Key Recommendations"])
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Temporal Trends", 
+                            "🚚 Delivery Performance",
+                            "🔄 Cohort Analysis", 
+                            "👥 RFM Segmentation",
+                            "💡 Key Recommendations",
+                            ])
 
 with tab1:
     # Monthly trends using simple function
@@ -560,6 +570,52 @@ with tab2:
         st.info("No delivery data available for the selected period")
 
 with tab3:
+    st.subheader("Customer Retention Cohort Analysis")
+    
+    # Quick config in columns
+    col1, col2 = st.columns(2)
+    with col1:
+        cohort_period = st.radio(
+            "Period",
+            options=['month', 'quarter'],
+            horizontal=True
+        )
+    with col2:
+        retention_type = st.radio(
+            "Metric",
+            options=['customers', 'revenue'],
+            format_func=lambda x: 'Customers' if x == 'customers' else 'Revenue',
+            horizontal=True
+        )
+    
+    # Run analysis
+    if st.button("Analyze Cohorts"):
+        with st.spinner("Generating cohort analysis..."):
+            results = cohort_analysis_dashboard(
+                orders_df=filtered_orders,
+                order_payments_df=filtered_payments,
+                customers_df=customers,
+                date_range=date_range,
+                cohort_period=cohort_period,
+                retention_type=retention_type,
+                max_periods=12
+            )
+            
+            if results:
+                display_cohort_analysis_streamlit(results)
+
+with tab4:
+    display_rfm_analysis_tab(
+        orders_df=filtered_orders,
+        order_payments_df=filtered_payments,
+        customers_df=customers,
+        date_range=date_range,
+        customer_state=customer_state,  # From sidebar filters
+        payment_method=payment_method,  # From sidebar filters  
+        product_category=product_category  # From sidebar filters
+    )     
+
+with tab5:
     st.subheader("🎯 Strategic Recommendations")
     
     # Generate insights based on metrics
@@ -611,3 +667,5 @@ with tab3:
 st.markdown("---")
 st.caption("Dashboard generated with Streamlit | Data refreshed in real-time | Executive View")
 st.caption(f"Data Period: {date_range[0]} to {date_range[1]}")
+
+
