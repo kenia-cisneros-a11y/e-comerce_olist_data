@@ -1,7 +1,7 @@
 # 📊 Olist E-commerce Dashboard
 
 ## 📝 Description
-Interactive e-commerce analytics dashboard built with Streamlit for visualizing and analyzing Olist platform data. Provides detailed insights into sales, customers, products, and business performance.
+Interactive e-commerce analytics dashboard built with Streamlit for visualizing and analyzing Olist platform [data](https://www.kaggle.com/code/terencicp/sql-challenge-e-commerce-data-analysis). Provides detailed insights into sales, customers, products, and business performance.
 
 ## ✨ Key Features
 
@@ -106,12 +106,6 @@ The dashboard expects the following tables:
 
 ## 🎨 Customization
 
-### Predefined Colors
-```python
-colors = ['#2ecc71', '#3498db', '#e74c3c', '#f39c12', '#9b59b6', 
-          '#1abc9c', '#34495e', '#e67e22', '#95a5a6', '#d35400']
-```
-
 ### Layout
 - **Wide Layout**: Optimized for large screens
 - **Sidebar**: Main filters and controls
@@ -197,9 +191,6 @@ For questions or issues, review the module documentation:
    - Click "Reset All Filters" to start fresh
    - Apply filters one at a time to identify issues
    - Check for data availability in selected date range
-
-
-## 🙏 Acknowledgments
 
 Built with:
 - Streamlit for web framework
