@@ -566,33 +566,11 @@ with col3:
             
 st.markdown("---")
 
-# ========== FILTER SUMMARY STATISTICS ==========
-st.header("📊 Filter Summary Statistics")
-summary_col1, summary_col2, summary_col3, summary_col4 = st.columns(4)
-
-with summary_col1:
-    unique_customers = filtered_orders['customer_id'].nunique()
-    st.metric("👥 Unique Customers", f"{unique_customers:,}")
-
-with summary_col2:
-    total_products = filtered_order_items['product_id'].nunique() if not filtered_order_items.empty else 0
-    st.metric("🛍️ Products Sold", f"{total_products:,}")
-
-with summary_col3:
-    total_revenue = filtered_payments[filtered_payments['order_id'].isin(filtered_orders['order_id'])]['payment_value'].sum()
-    st.metric("💵 Total Revenue", f"${total_revenue:,.2f}")
-
-with summary_col4:
-    avg_items_per_order = len(filtered_order_items) / total_orders if total_orders > 0 else 0
-    st.metric("📦 Avg Items/Order", f"{avg_items_per_order:.2f}")
-
-st.markdown("---")
-
 # SECTION 6: DETAILED INSIGHTS (unchanged)
 st.header("📈 Detailed Performance Insights")
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["📈 Temporal Trends & Forecasting",  
-                            "🚚 Delivery Performance",
+tab1, tab2, tab3, tab4 = st.tabs(["📈 Temporal Trends & Forecasting",  
+                            # "🚚 Delivery Performance",
                             "🔄 Cohort Analysis", 
                             "👥 RFM Segmentation",
                             "💰 Customer Lifetime Value"
@@ -611,41 +589,41 @@ with tab1:
         value_column='y'
     )
 
-with tab2:
-    # Delivery performance using simple function
-    delivery_metrics = delivery_time_analysis_simple(order_items, filtered_orders)
-    if not delivery_metrics.empty:
-        col1, col2, col3 = st.columns(3)
+# with tab2:
+#     # Delivery performance using simple function
+#     delivery_metrics = delivery_time_analysis_simple(order_items, filtered_orders)
+#     if not delivery_metrics.empty:
+#         col1, col2, col3 = st.columns(3)
         
-        with col1:
-            avg_delivery = delivery_metrics['avg_delivery_time_days'].mean()
-            st.metric("⏱️ Avg Delivery Time", f"{avg_delivery:.1f} days")
+#         with col1:
+#             avg_delivery = delivery_metrics['avg_delivery_time_days'].mean()
+#             st.metric("⏱️ Avg Delivery Time", f"{avg_delivery:.1f} days")
         
-        with col2:
-            min_delivery = delivery_metrics['avg_delivery_time_days'].min()
-            st.metric("🚀 Fastest Delivery", f"{min_delivery:.1f} days")
+#         with col2:
+#             min_delivery = delivery_metrics['avg_delivery_time_days'].min()
+#             st.metric("🚀 Fastest Delivery", f"{min_delivery:.1f} days")
         
-        with col3:
-            max_delivery = delivery_metrics['avg_delivery_time_days'].max()
-            st.metric("🐌 Slowest Delivery", f"{max_delivery:.1f} days")
+#         with col3:
+#             max_delivery = delivery_metrics['avg_delivery_time_days'].max()
+#             st.metric("🐌 Slowest Delivery", f"{max_delivery:.1f} days")
         
-        # Delivery time distribution
-        fig7, ax7 = plt.subplots(figsize=(10, 5))
-        ax7.hist(delivery_metrics['avg_delivery_time_days'].dropna(), bins=20, 
-                color='#3498db', edgecolor='black', alpha=0.7)
-        ax7.axvline(avg_delivery, color='red', linestyle='--', linewidth=2, 
-                   label=f'Average: {avg_delivery:.1f} days')
-        ax7.set_xlabel("Delivery Time (days)", fontsize=11)
-        ax7.set_ylabel("Frequency", fontsize=11)
-        ax7.set_title("Delivery Time Distribution", fontsize=12, fontweight='bold')
-        ax7.legend()
-        ax7.grid(True, alpha=0.3)
-        plt.tight_layout()
-        st.pyplot(fig7)
-    else:
-        st.info("No delivery data available for the selected period")
+#         # Delivery time distribution
+#         fig7, ax7 = plt.subplots(figsize=(10, 5))
+#         ax7.hist(delivery_metrics['avg_delivery_time_days'].dropna(), bins=20, 
+#                 color='#3498db', edgecolor='black', alpha=0.7)
+#         ax7.axvline(avg_delivery, color='red', linestyle='--', linewidth=2, 
+#                    label=f'Average: {avg_delivery:.1f} days')
+#         ax7.set_xlabel("Delivery Time (days)", fontsize=11)
+#         ax7.set_ylabel("Frequency", fontsize=11)
+#         ax7.set_title("Delivery Time Distribution", fontsize=12, fontweight='bold')
+#         ax7.legend()
+#         ax7.grid(True, alpha=0.3)
+#         plt.tight_layout()
+#         st.pyplot(fig7)
+#     else:
+#         st.info("No delivery data available for the selected period")
 
-with tab3:
+with tab2:
     st.subheader("Customer Retention Cohort Analysis")
 
     # Add description
@@ -694,7 +672,7 @@ with tab3:
             if results:
                 display_cohort_analysis_streamlit(results)
 
-with tab4:
+with tab3:
     display_rfm_analysis_tab(
         orders_df=filtered_orders,
         order_payments_df=filtered_payments,
@@ -705,6 +683,6 @@ with tab4:
         product_category=product_category  # From sidebar filters
     )   
 
-with tab5:
+with tab4:
     display_clv_analysis_tab(filtered_orders, filtered_payments, customers, 
                             date_range, customer_state, payment_method, product_category)

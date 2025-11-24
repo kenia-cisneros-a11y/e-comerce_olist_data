@@ -192,6 +192,10 @@ For questions or issues, review the module documentation:
    - Apply filters one at a time to identify issues
    - Check for data availability in selected date range
 
+4. **Deployment Issues:** You can deploy the app vie GitHub with Streamlit Cloud
+   - I can´t import correctly the modules
+   - Error: "😧 Error installing requirements."
+
 Built with:
 - Streamlit for web framework
 - Plotly for interactive visualizations

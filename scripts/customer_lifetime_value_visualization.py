@@ -131,10 +131,6 @@ def display_clv_analysis_tab(orders_df, order_payments_df, customers_df=None,
         clv_df = results['clv_df']
         prediction_months = results['prediction_months']
         
-        # Display key metrics
-        st.markdown("---")
-        display_clv_metrics(clv_df, prediction_months)
-        
         # Create tabs for different visualizations
         viz_tab1, viz_tab2, viz_tab3, viz_tab4, viz_tab5 = st.tabs([
             "📊 Value Distribution",
@@ -172,62 +168,6 @@ def display_clv_analysis_tab(orders_df, order_payments_df, customers_df=None,
         
     else:
         st.info("👆 Click 'Calculate Lifetime Values' to analyze your customer CLV")
-
-
-def display_clv_metrics(clv_df, prediction_months):
-    """Display key CLV metrics in metric cards"""
-    
-    col1, col2, col3, col4, col5, col6 = st.columns(6)
-    
-    with col1:
-        total_customers = len(clv_df)
-        st.metric(
-            "👥 Total Customers",
-            f"{total_customers:,}",
-            help="Total unique customers analyzed"
-        )
-    
-    with col2:
-        total_current_value = clv_df['total_value'].sum()
-        st.metric(
-            "💵 Current Value",
-            f"${total_current_value:,.0f}",
-            help="Total historical revenue from all customers"
-        )
-    
-    with col3:
-        total_predicted_clv = clv_df['predicted_clv'].sum()
-        st.metric(
-            "📈 Predicted CLV",
-            f"${total_predicted_clv:,.0f}",
-            f"${(total_predicted_clv - total_current_value):,.0f}",
-            help=f"Total predicted value over next {prediction_months} months"
-        )
-    
-    with col4:
-        avg_clv = clv_df['predicted_clv'].mean()
-        st.metric(
-            "💰 Avg CLV",
-            f"${avg_clv:,.0f}",
-            help=f"Average {prediction_months}-month CLV per customer"
-        )
-    
-    with col5:
-        avg_frequency = clv_df['purchase_frequency'].mean()
-        st.metric(
-            "🔄 Avg Frequency",
-            f"{avg_frequency:.1f} days",
-            help="Average days between purchases"
-        )
-    
-    with col6:
-        high_value_pct = (len(clv_df[clv_df['clv_tier'] == 'High Value']) / total_customers * 100) if 'clv_tier' in clv_df.columns else 0
-        st.metric(
-            "💎 High Value %",
-            f"{high_value_pct:.1f}%",
-            help="Percentage of high-value customers"
-        )
-
 
 def display_clv_distribution(clv_df):
     """Display CLV distribution visualizations"""
