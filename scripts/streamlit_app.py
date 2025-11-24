@@ -6,6 +6,7 @@ import numpy as np
 import sys
 import os
 import warnings
+from datetime import datetime, timedelta
 
 # Suppress all UserWarnings
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -138,46 +139,96 @@ def delivery_time_analysis_simple(order_items_df, orders_df):
     
     return delivery_metrics
 
+# Function to apply contextual filters
+def apply_contextual_filters(df, date_column=None, start_date=None, end_date=None):
+    """Apply contextual filters to a DataFrame"""
+    filtered_df = df.copy()
+    
+    # Date filter
+    if date_column and date_column in filtered_df.columns and start_date and end_date:
+        filtered_df[date_column] = pd.to_datetime(filtered_df[date_column])
+        filtered_df = filtered_df[
+            (filtered_df[date_column].dt.date >= start_date) & 
+            (filtered_df[date_column].dt.date <= end_date)
+        ]
+    
+    return filtered_df
+
 # Load all data
 orders, order_payments, customers, products, order_items, order_reviews, product_category_name_translation, sellers, geolocation, leads_qualified, leads_closed = load_data()
 
-# Sidebar filters
-st.sidebar.header("🔍 Filters")
+# ========== ENHANCED SIDEBAR FILTERS ==========
+st.sidebar.header("🔍 Advanced Filters")
 
-# Date filter
-min_date = orders['order_purchase_timestamp'].min()
-max_date = orders['order_purchase_timestamp'].max()
-date_range = st.sidebar.date_input(
-    "📅 Date range", 
-    [min_date, max_date],
-    min_value=min_date,
-    max_value=max_date
-)
+# Date filter with columns for better layout
+st.sidebar.subheader("📅 Date Range")
+min_date = orders['order_purchase_timestamp'].min().date()
+max_date = orders['order_purchase_timestamp'].max().date()
+
+col_date1, col_date2 = st.sidebar.columns(2)
+with col_date1:
+    start_date = st.date_input(
+        "Start Date",
+        value=min_date,
+        min_value=min_date,
+        max_value=max_date,
+        key="start_date"
+    )
+with col_date2:
+    end_date = st.date_input(
+        "End Date",
+        value=max_date,
+        min_value=min_date,
+        max_value=max_date,
+        key="end_date"
+    )
+
+date_range = [start_date, end_date]
+
+# Merge products with translations first for category filter
+products_with_english = products.merge(product_category_name_translation, on='product_category_name', how='left')
 
 # State filter
+st.sidebar.subheader("📍 Location")
+available_states = sorted(customers['customer_state'].unique())
 customer_state = st.sidebar.multiselect(
-    "📍 Customer state", 
-    options=sorted(customers['customer_state'].unique()),
-    default=None
+    "Customer State",
+    options=available_states,
+    default=None,
+    key="customer_states"
 )
 
 # Payment method filter
+st.sidebar.subheader("💳 Payment")
+available_payment_methods = sorted(order_payments['payment_type'].unique())
 payment_method = st.sidebar.multiselect(
-    "💳 Payment method", 
-    options=sorted(order_payments['payment_type'].unique()),
-    default=None
+    "Payment Method",
+    options=available_payment_methods,
+    default=None,
+    key="payment_methods"
 )
 
-# Product category filter - Merge products with translations first
-products_with_english = products.merge(product_category_name_translation, on='product_category_name', how='left')
-available_categories = products_with_english['product_category_name'].dropna().unique()
+# Product category filter
+st.sidebar.subheader("📦 Products")
+available_categories = sorted(products_with_english['product_category_name'].dropna().unique())
 product_category = st.sidebar.multiselect(
-    "📦 Product category", 
-    options=sorted(available_categories),
-    default=None
+    "Product Category",
+    options=available_categories,
+    default=None,
+    key="product_categories",
+    help="Select up to 10 categories for better performance"
 )
 
-# Apply filters
+# Apply Filters button
+st.sidebar.markdown("---")
+apply_filters_button = st.sidebar.button("🔄 Apply Filters", type="primary", use_container_width=True)
+
+# Reset Filters button
+if st.sidebar.button("🔄 Reset All Filters", use_container_width=True):
+    st.rerun()
+
+# ========== APPLY FILTERS TO DATA ==========
+# Apply date filter to orders
 filtered_orders = orders[
     (orders['order_purchase_timestamp'] >= pd.to_datetime(date_range[0])) &
     (orders['order_purchase_timestamp'] <= pd.to_datetime(date_range[1]))
@@ -187,6 +238,8 @@ filtered_orders = orders[
 if customer_state:
     filtered_customers = customers[customers['customer_state'].isin(customer_state)]
     filtered_orders = filtered_orders[filtered_orders['customer_id'].isin(filtered_customers['customer_id'])]
+else:
+    filtered_customers = customers
 
 # Filter order payments by payment method if selected
 filtered_payments = order_payments.copy()
@@ -200,9 +253,16 @@ if product_category:
     filtered_order_items = order_items[order_items['product_id'].isin(filtered_products['product_id'])]
     filtered_orders = filtered_orders[filtered_orders['order_id'].isin(filtered_order_items['order_id'].unique())]
 
+# Apply date filter to leads
+filtered_leads_qualified = apply_contextual_filters(
+    leads_qualified, 
+    date_column='first_contact_date',
+    start_date=start_date,
+    end_date=end_date
+)
+
 # Title
-st.title("📊 Olist E-commerce")
-st.markdown("---")
+st.title("📊 Olist E-commerce Dashboard")
 
 # SECTION 1: KEY METRICS (GENERAL)
 col1, col2, col3, col4, col5, col6, col7, col8 = st.columns(8)
@@ -217,7 +277,6 @@ try:
         date_range=date_range
     )
 except Exception as e:
-
     st.warning(f"Unable to load satisfaction analysis: {str(e)}")
     col1, col2, col3 = st.columns(3)
     with col1:
@@ -289,26 +348,47 @@ with col7:
 
 st.markdown("---")
 
-# SECTION 2: PAYMENT TYPES BREAKDOWN
-# Use the conversion_rate_by_payment_method function from key_metrics
-
+# SECTION 2: PAYMENT TYPES BREAKDOWN WITH ENHANCED VISUALIZATIONS
 conversion_data = conversion_rate_by_payment_method(filtered_orders, filtered_payments)
 
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    # Payment type distribution
-    st.subheader("Payment Distribution")
+    # Enhanced Payment Distribution with Bar Chart
+    st.subheader("💳 Payment Distribution")
     if not conversion_data.empty:
-        total_payment_sum = conversion_data['total_payment_value'].sum()
-        for _, row in conversion_data.iterrows():
-            percentage = (row['conversion_rate'] * 100)
-            st.text(f"{row['payment_type']}: {percentage:.1f}% - ${row['total_payment_value']:,.2f}")
+        # Create mini bar chart for payment distribution
+        payment_fig = go.Figure(data=[
+            go.Bar(
+                x=conversion_data['payment_type'],
+                y=conversion_data['conversion_rate'] * 100,
+                text=[f"{rate*100:.1f}%<br>${val:,.0f}" 
+                      for rate, val in zip(conversion_data['conversion_rate'], 
+                                          conversion_data['total_payment_value'])],
+                textposition='outside',
+                marker_color='#3498db',
+                hovertemplate='<b>%{x}</b><br>' +
+                            'Conversion: %{y:.1f}%<br>' +
+                            '<extra></extra>'
+            )
+        ])
+        
+        payment_fig.update_layout(
+            xaxis_title="Payment Type",
+            yaxis_title="Conversion Rate (%)",
+            height=400,
+            showlegend=False,
+            margin=dict(t=20, b=40, l=40, r=20)
+        )
+        
+        st.plotly_chart(payment_fig, use_container_width=True)
+    else:
+        st.warning("No payment data for selected filters")
 
 with col2:
-    # lead sourcers distribution pie chart
-    # Lead source distribution
-    lead_dist = leads_qualified['origin'].value_counts()
+    # Lead source distribution with filter info
+    st.subheader("📊 Lead Sources")
+    lead_dist = filtered_leads_qualified['origin'].value_counts()
 
     if not lead_dist.empty:
         colors = ['#2ecc71', '#3498db', '#e74c3c', '#f39c12', '#9b59b6', 
@@ -319,7 +399,7 @@ with col2:
             values=lead_dist.values,
             marker=dict(
                 colors=colors[:len(lead_dist)],
-                line=dict(color='white', width=2)  # Añade líneas blancas entre segmentos
+                line=dict(color='white', width=2)
             ),
             textposition='auto',
             textinfo='label+percent',
@@ -327,32 +407,34 @@ with col2:
             hovertemplate='<b>%{label}</b><br>' +
                         'Count: %{value}<br>' +
                         'Percentage: %{percent}<br>' +
+                        f'Period: {start_date.strftime("%d/%m/%Y")} - {end_date.strftime("%d/%m/%Y")}<br>' +
                         '<extra></extra>',
-            rotation=90  # Equivalente a startangle
+            rotation=90
         )])
         
         fig3.update_layout(
             title=dict(
-                text="Lead Sources Distribution",
+                text=f"Lead Sources<br><sub>({len(lead_dist)} sources, {lead_dist.sum()} total)</sub>",
                 font=dict(size=14, family="Arial, sans-serif", color='black'),
                 x=0.5,
                 xanchor='center'
             ),
             showlegend=True,
             height=500,
-            width=500,
-            margin=dict(t=60, b=20, l=20, r=20)
+            margin=dict(t=80, b=20, l=20, r=20)
         )
         
-        # Configuración adicional para el texto en negrita (usando HTML)
         fig3.update_traces(
             texttemplate='<b>%{label}</b><br><b>%{percent}</b>'
         )
         
         st.plotly_chart(fig3, use_container_width=True)
-with col3:
-    # product categories distribution
+    else:
+        st.warning("No lead data for selected filters")
 
+with col3:
+    # Product categories distribution with enhanced info
+    st.subheader("📦 Product Categories")
     if not filtered_order_items.empty:
         # Merge to get categories and order status
         category_status = filtered_order_items.merge(
@@ -380,7 +462,6 @@ with col3:
             
             fig2 = go.Figure()
             
-            # Crear una traza para cada columna (estado de orden)
             for i, col in enumerate(top_categories.columns):
                 fig2.add_trace(go.Bar(
                     name=col,
@@ -391,13 +472,14 @@ with col3:
                     textposition='inside',
                     texttemplate='%{text:.0f}',
                     hovertemplate='<b>%{x}</b><br>' +
-                                f'{col}: %{{y}}<br>' +
+                                f'{col}: %{{y}} orders<br>' +
                                 '<extra></extra>'
                 ))
             
+            total_category_orders = category_status['order_id'].nunique()
             fig2.update_layout(
                 title=dict(
-                    text="Top 10 Product Categories by Order Status",
+                    text=f"Top 10 Categories<br><sub>(Total: {total_category_orders} orders)</sub>",
                     x=0.5,
                     xanchor='center'
                 ),
@@ -409,7 +491,7 @@ with col3:
                 yaxis=dict(
                     title="Number of Orders",
                 ),
-                barmode='stack',  # Importante: esto hace que las barras sean apiladas
+                barmode='stack',
                 legend=dict(
                     title=dict(text="Order Status"),
                     orientation="v",
@@ -419,20 +501,42 @@ with col3:
                     x=1.02
                 ),
                 height=500,
-                margin=dict(r=150, b=100),  # Margen derecho para la leyenda y inferior para etiquetas rotadas
+                margin=dict(r=150, b=100, t=80),
                 showlegend=True,
                 hovermode='x unified'
             )
             
             st.plotly_chart(fig2, use_container_width=True)
         else:
-            st.info("No category data available for the selected filters")
+            st.info("No category data for selected filters")
     else:
-        st.info("No order items data available for the selected filters")
+        st.info("No order items data for selected filters")
             
 st.markdown("---")
 
-# SECTION 6: DETAILED INSIGHTS
+# ========== FILTER SUMMARY STATISTICS ==========
+st.header("📊 Filter Summary Statistics")
+summary_col1, summary_col2, summary_col3, summary_col4 = st.columns(4)
+
+with summary_col1:
+    unique_customers = filtered_orders['customer_id'].nunique()
+    st.metric("👥 Unique Customers", f"{unique_customers:,}")
+
+with summary_col2:
+    total_products = filtered_order_items['product_id'].nunique() if not filtered_order_items.empty else 0
+    st.metric("🛍️ Products Sold", f"{total_products:,}")
+
+with summary_col3:
+    total_revenue = filtered_payments[filtered_payments['order_id'].isin(filtered_orders['order_id'])]['payment_value'].sum()
+    st.metric("💵 Total Revenue", f"${total_revenue:,.2f}")
+
+with summary_col4:
+    avg_items_per_order = len(filtered_order_items) / total_orders if total_orders > 0 else 0
+    st.metric("📦 Avg Items/Order", f"{avg_items_per_order:.2f}")
+
+st.markdown("---")
+
+# SECTION 6: DETAILED INSIGHTS (unchanged)
 st.header("📈 Detailed Performance Insights")
 
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["📈 Temporal Trends & Forecasting",  
@@ -521,8 +625,6 @@ with tab3:
             format_func=lambda x: 'Customers' if x == 'customers' else 'Revenue',
             horizontal=True
         )
-
-
     
     # Run analysis
     if st.button("Analyze Cohorts"):
@@ -554,6 +656,3 @@ with tab4:
 with tab5:
     display_clv_analysis_tab(filtered_orders, filtered_payments, customers, 
                             date_range, customer_state, payment_method, product_category)
-
-
-
