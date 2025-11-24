@@ -268,23 +268,26 @@ st.title("📊 Olist E-commerce Dashboard")
 col1, col2, col3, col4, col5, col6, col7, col8 = st.columns(8)
 
 try:
-    # Call the function with available parameters
+    # Filter reviews based on filtered orders
+    filtered_order_reviews = order_reviews[order_reviews['order_id'].isin(filtered_orders['order_id'])]
+    
+    # Call the function with filtered data
     satisfaction_summary, review_insights, top_narratives = customer_satisfaction_analysis(
-        order_reviews, 
-        orders_df=orders,
+        filtered_order_reviews,  # Use filtered reviews
+        orders_df=filtered_orders,  # Use filtered orders
         products_df=products_with_english,
-        order_items_df=order_items,
+        order_items_df=filtered_order_items,  # Use filtered order items
         date_range=date_range
     )
 except Exception as e:
     st.warning(f"Unable to load satisfaction analysis: {str(e)}")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("⭐ Average Rating", "N/A")
-    with col2:
-        st.metric("👍 Satisfaction Rate", "N/A")
-    with col3:
-        st.metric("💬 Total Reviews", "N/A")
+    # Create default values if analysis fails
+    review_insights = {
+        'avg_score': 0,
+        'nps_score': 0,
+        'total_reviews': 0
+    }
+    filtered_order_reviews = order_reviews[order_reviews['order_id'].isin(filtered_orders['order_id'])]
 
 with col1:
     revenue = filtered_payments[filtered_payments['order_id'].isin(filtered_orders['order_id'])]['payment_value'].sum()
@@ -331,20 +334,69 @@ with col5:
     )
     
 with col6:
-    avg_score = review_insights.get('avg_score', 0)
+    # Filter reviews with scores for calculations
+    filtered_reviews_with_scores = filtered_order_reviews[
+        filtered_order_reviews['review_score'].notna()
+    ]
+    
+    # Calculate average score with filtered data
+    if 'avg_score' in review_insights and review_insights['avg_score'] > 0:
+        avg_score = review_insights.get('avg_score', 0)
+    else:
+        # Fallback calculation if needed
+        avg_score = filtered_reviews_with_scores['review_score'].mean() if len(filtered_reviews_with_scores) > 0 else 0
+    
+    # Add delta comparing to overall average
+    overall_avg = order_reviews['review_score'].mean() if len(order_reviews) > 0 else avg_score
+    delta_score = avg_score - overall_avg if avg_score > 0 else None
+    
     st.metric(
         label="⭐ Average Rating",
-        value=f"{avg_score:.2f}/5.0",
-        delta=None
+        value=f"{avg_score:.2f}/5.0" if avg_score > 0 else "N/A",
+        delta=f"{delta_score:+.2f}" if delta_score is not None else None,
+        help=f"Based on {len(filtered_reviews_with_scores)} filtered reviews"
     )
 
 with col7:
-    nps_score = review_insights.get('nps_score', 0)
+    # Filter reviews for NPS calculation
+    filtered_reviews_for_nps = filtered_order_reviews[
+        filtered_order_reviews['review_score'].notna()
+    ]
+    
+    # Calculate NPS score with filtered data
+    if 'nps_score' in review_insights and review_insights.get('nps_score', 0) != 0:
+        nps_score = review_insights.get('nps_score', 0)
+    else:
+        # Fallback NPS calculation
+        if len(filtered_reviews_for_nps) > 0:
+            promoters = len(filtered_reviews_for_nps[filtered_reviews_for_nps['review_score'] >= 4])
+            detractors = len(filtered_reviews_for_nps[filtered_reviews_for_nps['review_score'] <= 2])
+            total = len(filtered_reviews_for_nps)
+            nps_score = ((promoters - detractors) / total) * 100 if total > 0 else 0
+        else:
+            nps_score = 0
+    
+    # Calculate overall NPS for comparison
+    if len(order_reviews) > 0:
+        reviews_with_score = order_reviews[order_reviews['review_score'].notna()]
+        if len(reviews_with_score) > 0:
+            all_promoters = len(reviews_with_score[reviews_with_score['review_score'] >= 4])
+            all_detractors = len(reviews_with_score[reviews_with_score['review_score'] <= 2])
+            all_total = len(reviews_with_score)
+            overall_nps = ((all_promoters - all_detractors) / all_total) * 100 if all_total > 0 else 0
+            delta_nps = nps_score - overall_nps if nps_score != 0 else None
+        else:
+            delta_nps = None
+    else:
+        delta_nps = None
+    
     st.metric(
-            label="📈 NPS Score",
-            value=f"{nps_score:.1f}",
-            delta=None
-        )
+        label="📈 NPS Score",
+        value=f"{nps_score:.1f}" if nps_score != 0 else "N/A",
+        delta=f"{delta_nps:+.1f}" if delta_nps is not None else None,
+        help=f"Net Promoter Score based on {len(filtered_reviews_for_nps)} reviews"
+    )
+
 
 st.markdown("---")
 
