@@ -1,0 +1,25 @@
+{
+  "training_history": {
+    "train_start": "2016-09-04 00:00:00",
+    "train_end": "2018-04-17 00:00:00",
+    "test_start": "2018-04-18 00:00:00",
+    "test_end": "2018-10-17 00:00:00",
+    "train_samples": 482,
+    "test_samples": 151,
+    "mae_score": 16007.115727832908,
+    "model_params": {
+      "seasonality_mode": "additive",
+      "changepoint_prior_scale": 0.075,
+      "seasonality_prior_scale": 10.0,
+      "yearly_seasonality": true,
+      "weekly_seasonality": true,
+      "daily_seasonality": true
+    },
+    "timestamp": "2025-11-23T21:21:59.106605"
+  },
+  "mae_score": 16007.115727832908,
+  "test_metrics": {
+    "mae": 16007.115727832908,
+    "test_samples": 151
+  }
+}

@@ -355,7 +355,8 @@ class ProphetVisualizer:
         )
         
         # 4. ACF Plot (simplified)
-        from statsmodels.stats.stattools import acf
+        from statsmodels.tsa.stattools import acf
+
         acf_values = acf(residuals, nlags=40)
         lags = np.arange(len(acf_values))
         

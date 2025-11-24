@@ -25,6 +25,7 @@ from cohort_analysis import (
 )
 from rfm_visualization import display_rfm_analysis_tab
 from customer_lifetime_value_visualization import display_clv_analysis_tab
+from streamlit_prophet_integration import add_prophet_tab
 
 # Page config
 st.set_page_config(
@@ -517,33 +518,26 @@ st.markdown("---")
 # SECTION 6: DETAILED INSIGHTS
 st.header("📈 Detailed Performance Insights")
 
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📊 Temporal Trends", 
+tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📈 Temporal Trends & Forecasting",  
                             "🚚 Delivery Performance",
                             "🔄 Cohort Analysis", 
                             "👥 RFM Segmentation",
-                            "💰 Lifetime Value",
+                            "💰 Customer Lifetime Value",
                             "💡 Key Recommendations",
                             ])
 
 with tab1:
-    # Monthly trends using simple function
-    trends = temporal_trends_analysis_simple(filtered_orders)
-    if not trends.empty:
-        fig6, ax6 = plt.subplots(figsize=(12, 6))
-        
-        # Orders trend
-        ax6.plot(trends['order_month'].astype(str), trends['total_orders'], 
-                 marker='o', color='#3498db', linewidth=2, markersize=8)
-        ax6.set_xlabel("Month", fontsize=11)
-        ax6.set_ylabel("Number of Orders", fontsize=11)
-        ax6.set_title("Monthly Order Trends", fontsize=12, fontweight='bold')
-        ax6.grid(True, alpha=0.3)
-        plt.setp(ax6.xaxis.get_majorticklabels(), rotation=45, ha='right')
-        
-        plt.tight_layout()
-        st.pyplot(fig6)
-    else:
-        st.info("No temporal data available for the selected period")
+    # load data
+    prophet_data = pd.merge(orders, order_payments, on='order_id')
+    daily_revenue = prophet_data.groupby(prophet_data['order_purchase_timestamp'].dt.date)['payment_value'].sum().reset_index()
+    daily_revenue.columns = ['ds', 'y']  # Prophet requiere estas columnas
+
+    # Agregar funcionalidad Prophet
+    add_prophet_tab(
+        df=daily_revenue,
+        date_column='ds',
+        value_column='y'
+    )
 
 with tab2:
     # Delivery performance using simple function
