@@ -1,0 +1,30 @@
+{
+  "experiment_name": "MSI_Extension_Q1_2024",
+  "treatment": {
+    "msi_months": [12, 18, 24],
+    "description": "Extended MSI - up to 24 months"
+  },
+  "control": {
+    "msi_months": [3, 6],
+    "description": "Standard MSI - up to 6 months"
+  },
+  "stratification": {
+    "product_category_name": true,
+    "state": true,
+    "aov_percentile": true
+  },
+  "allocation": {
+    "treatment_ratio": 0.5,
+    "seed": 42
+  },
+  "metrics": {
+    "primary": "proxy_index",
+    "secondary": ["s1_delivery", "s2_satisfaction", "payment_installments", "aov"],
+    "guardrails": ["payment_approval_rate", "cancellation_rate", "delivery_time"]
+  },
+  "analysis": {
+    "confidence_level": 0.95,
+    "test_type": "one_tailed",
+    "min_sample_size": 1000
+  }
+}
