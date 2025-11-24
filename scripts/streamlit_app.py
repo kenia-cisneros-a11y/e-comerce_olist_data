@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import plotly.graph_objects as go
 import numpy as np
 import sys
 import os
@@ -82,7 +83,7 @@ def load_data():
     leads_closed_df['won_date'] = pd.to_datetime(leads_closed_df['won_date'])
 
     # Basic preprocessing categorical columns
-    product_category_name_translation_df['product_category_name_english'] = product_category_name_translation_df['product_category_name_english'].str.upper().str.replace('_', ' ')
+    product_category_name_translation_df['product_category_name'] = product_category_name_translation_df['product_category_name'].str.upper().str.replace('_', ' ')
     orders_df['order_status'] = orders_df['order_status'].str.upper()
     order_payments_df['payment_type'] = order_payments_df['payment_type'].str.upper().str.replace('_', ' ')
     products_df['product_category_name'] = products_df['product_category_name'].str.upper().str.replace('_', ' ')
@@ -169,7 +170,7 @@ payment_method = st.sidebar.multiselect(
 
 # Product category filter - Merge products with translations first
 products_with_english = products.merge(product_category_name_translation, on='product_category_name', how='left')
-available_categories = products_with_english['product_category_name_english'].dropna().unique()
+available_categories = products_with_english['product_category_name'].dropna().unique()
 product_category = st.sidebar.multiselect(
     "📦 Product category", 
     options=sorted(available_categories),
@@ -195,18 +196,36 @@ if payment_method:
 # Filter by product category if selected
 filtered_order_items = order_items.copy()
 if product_category:
-    filtered_products = products_with_english[products_with_english['product_category_name_english'].isin(product_category)]
+    filtered_products = products_with_english[products_with_english['product_category_name'].isin(product_category)]
     filtered_order_items = order_items[order_items['product_id'].isin(filtered_products['product_id'])]
     filtered_orders = filtered_orders[filtered_orders['order_id'].isin(filtered_order_items['order_id'].unique())]
 
 # Title
-st.title("📊 Executive E-commerce Dashboard")
+st.title("📊 Olist E-commerce")
 st.markdown("---")
 
 # SECTION 1: KEY METRICS (GENERAL)
-st.header("🎯 Overall Performance Metrics")
+col1, col2, col3, col4, col5, col6, col7, col8 = st.columns(8)
 
-col1, col2, col3, col4, col5 = st.columns(5)
+try:
+    # Call the function with available parameters
+    satisfaction_summary, review_insights, top_narratives = customer_satisfaction_analysis(
+        order_reviews, 
+        orders_df=orders,
+        products_df=products_with_english,
+        order_items_df=order_items,
+        date_range=date_range
+    )
+except Exception as e:
+
+    st.warning(f"Unable to load satisfaction analysis: {str(e)}")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("⭐ Average Rating", "N/A")
+    with col2:
+        st.metric("👍 Satisfaction Rate", "N/A")
+    with col3:
+        st.metric("💬 Total Reviews", "N/A")
 
 with col1:
     revenue = filtered_payments[filtered_payments['order_id'].isin(filtered_orders['order_id'])]['payment_value'].sum()
@@ -251,16 +270,31 @@ with col5:
         value=f"{cancel_rate:.1f}%",
         delta=None
     )
+    
+with col6:
+    avg_score = review_insights.get('avg_score', 0)
+    st.metric(
+        label="⭐ Average Rating",
+        value=f"{avg_score:.2f}/5.0",
+        delta=None
+    )
+
+with col7:
+    nps_score = review_insights.get('nps_score', 0)
+    st.metric(
+            label="📈 NPS Score",
+            value=f"{nps_score:.1f}",
+            delta=None
+        )
 
 st.markdown("---")
 
 # SECTION 2: PAYMENT TYPES BREAKDOWN
-st.header("💳 Payment Methods Analysis")
-
 # Use the conversion_rate_by_payment_method function from key_metrics
+
 conversion_data = conversion_rate_by_payment_method(filtered_orders, filtered_payments)
 
-col1, col2 = st.columns([1, 2])
+col1, col2, col3 = st.columns(3)
 
 with col1:
     # Payment type distribution
@@ -272,258 +306,140 @@ with col1:
             st.text(f"{row['payment_type']}: {percentage:.1f}% - ${row['total_payment_value']:,.2f}")
 
 with col2:
-    if not conversion_data.empty:
-        fig1, ax1 = plt.subplots(figsize=(8, 6))
-        colors = plt.cm.Set3(range(len(conversion_data)))
-        bars = ax1.bar(conversion_data['payment_type'], conversion_data['conversion_rate'] * 100)
-        ax1.set_xlabel("Payment Type", fontsize=12)
-        ax1.set_ylabel("Conversion Rate (%)", fontsize=12)
-        ax1.set_title("Conversion Rate by Payment Method", fontsize=14, fontweight='bold')
-        plt.xticks(rotation=45, ha='right')
-        
-        # Add value labels on bars
-        for bar, val in zip(bars, conversion_data['conversion_rate'] * 100):
-            height = bar.get_height()
-            ax1.text(bar.get_x() + bar.get_width()/2., height,
-                    f'{val:.1f}%',
-                    ha='center', va='bottom', fontsize=10)
-        
-        plt.tight_layout()
-        st.pyplot(fig1)
-    else:
-        st.info("No payment data available for the selected filters")
-
-st.markdown("---")
-
-# SECTION 3: PRODUCT CATEGORIES WITH ORDER STATUS
-st.header("📦 Product Categories Performance")
-
-# Prepare category data with order status
-if not filtered_order_items.empty:
-    # Merge to get categories and order status
-    category_status = filtered_order_items.merge(
-        products_with_english[['product_id', 'product_category_name_english']], 
-        on='product_id', 
-        how='left'
-    ).merge(
-        filtered_orders[['order_id', 'order_status']], 
-        on='order_id', 
-        how='left'
-    )
-    
-    # Group by category and status
-    category_status_pivot = category_status.groupby(
-        ['product_category_name_english', 'order_status']
-    )['order_id'].nunique().unstack(fill_value=0)
-    
-    # Get top 10 categories by total orders
-    category_totals = category_status_pivot.sum(axis=1).sort_values(ascending=False).head(10)
-    top_categories = category_status_pivot.loc[category_totals.index]
-    
-    if not top_categories.empty:
-        fig2, ax2 = plt.subplots(figsize=(14, 8))
-        
-        # Create stacked bar chart
-        top_categories.plot(
-            kind='bar', 
-            stacked=True, 
-            ax=ax2,
-            color=['#2ecc71', '#e74c3c', '#3498db', '#f39c12', '#9b59b6', '#1abc9c', '#34495e', '#e67e22']
-        )
-        
-        ax2.set_xlabel("Product Category", fontsize=12)
-        ax2.set_ylabel("Number of Orders", fontsize=12)
-        ax2.set_title("Top 10 Product Categories by Order Status", fontsize=14, fontweight='bold')
-        ax2.legend(title="Order Status", bbox_to_anchor=(1.05, 1), loc='upper left')
-        plt.xticks(rotation=45, ha='right')
-        plt.tight_layout()
-        
-        st.pyplot(fig2)
-    else:
-        st.info("No category data available for the selected filters")
-else:
-    st.info("No order items data available for the selected filters")
-
-st.markdown("---")
-
-# SECTION 4: LEAD SOURCES (ORGANIC VS PAID)
-st.header("🎯 Lead Sources Analysis")
-
-col1, col2 = st.columns(2)
-
-with col1:
+    # lead sourcers distribution pie chart
     # Lead source distribution
     lead_dist = leads_qualified['origin'].value_counts()
-    
+
     if not lead_dist.empty:
-        fig3, ax3 = plt.subplots(figsize=(8, 8))
+        colors = ['#2ecc71', '#3498db', '#e74c3c', '#f39c12', '#9b59b6', 
+                '#1abc9c', '#34495e', '#e67e22', '#95a5a6', '#d35400']
         
-        colors = ['#2ecc71', '#3498db', '#e74c3c', '#f39c12', '#9b59b6', '#1abc9c', '#34495e', '#e67e22', '#95a5a6', '#d35400']
-        wedges, texts, autotexts = ax3.pie(
-            lead_dist.values, 
+        fig3 = go.Figure(data=[go.Pie(
             labels=lead_dist.index,
-            autopct='%1.1f%%',
-            colors=colors[:len(lead_dist)],
-            startangle=90,
-            textprops={'fontsize': 11}
+            values=lead_dist.values,
+            marker=dict(
+                colors=colors[:len(lead_dist)],
+                line=dict(color='white', width=2)  # Añade líneas blancas entre segmentos
+            ),
+            textposition='auto',
+            textinfo='label+percent',
+            textfont=dict(size=11, color='white'),
+            hovertemplate='<b>%{label}</b><br>' +
+                        'Count: %{value}<br>' +
+                        'Percentage: %{percent}<br>' +
+                        '<extra></extra>',
+            rotation=90  # Equivalente a startangle
+        )])
+        
+        fig3.update_layout(
+            title=dict(
+                text="Lead Sources Distribution",
+                font=dict(size=14, family="Arial, sans-serif", color='black'),
+                x=0.5,
+                xanchor='center'
+            ),
+            showlegend=True,
+            height=500,
+            width=500,
+            margin=dict(t=60, b=20, l=20, r=20)
         )
         
-        ax3.set_title("Lead Sources Distribution", fontsize=14, fontweight='bold')
+        # Configuración adicional para el texto en negrita (usando HTML)
+        fig3.update_traces(
+            texttemplate='<b>%{label}</b><br><b>%{percent}</b>'
+        )
         
-        # Make percentage text bold
-        for autotext in autotexts:
-            autotext.set_weight('bold')
-            autotext.set_color('white')
+        st.plotly_chart(fig3, use_container_width=True)
+with col3:
+    # product categories distribution
+
+    if not filtered_order_items.empty:
+        # Merge to get categories and order status
+        category_status = filtered_order_items.merge(
+            products_with_english[['product_id', 'product_category_name']], 
+            on='product_id', 
+            how='left'
+        ).merge(
+            filtered_orders[['order_id', 'order_status']], 
+            on='order_id', 
+            how='left'
+        )
         
-        st.pyplot(fig3)
+        # Group by category and status
+        category_status_pivot = category_status.groupby(
+            ['product_category_name', 'order_status']
+        )['order_id'].nunique().unstack(fill_value=0)
+        
+        # Get top 10 categories by total orders
+        category_totals = category_status_pivot.sum(axis=1).sort_values(ascending=False).head(10)
+        top_categories = category_status_pivot.loc[category_totals.index]
+        
+        if not top_categories.empty:
+            colors = ['#2ecc71', '#e74c3c', '#3498db', '#f39c12', '#9b59b6', 
+                    '#1abc9c', '#34495e', '#e67e22']
+            
+            fig2 = go.Figure()
+            
+            # Crear una traza para cada columna (estado de orden)
+            for i, col in enumerate(top_categories.columns):
+                fig2.add_trace(go.Bar(
+                    name=col,
+                    x=top_categories.index,
+                    y=top_categories[col],
+                    marker_color=colors[i % len(colors)],
+                    text=top_categories[col],
+                    textposition='inside',
+                    texttemplate='%{text:.0f}',
+                    hovertemplate='<b>%{x}</b><br>' +
+                                f'{col}: %{{y}}<br>' +
+                                '<extra></extra>'
+                ))
+            
+            fig2.update_layout(
+                title=dict(
+                    text="Top 10 Product Categories by Order Status",
+                    x=0.5,
+                    xanchor='center'
+                ),
+                xaxis=dict(
+                    title="Product Category",
+                    tickangle=-45,
+                    tickmode='linear'
+                ),
+                yaxis=dict(
+                    title="Number of Orders",
+                ),
+                barmode='stack',  # Importante: esto hace que las barras sean apiladas
+                legend=dict(
+                    title=dict(text="Order Status"),
+                    orientation="v",
+                    yanchor="top",
+                    y=1,
+                    xanchor="left",
+                    x=1.02
+                ),
+                height=500,
+                margin=dict(r=150, b=100),  # Margen derecho para la leyenda y inferior para etiquetas rotadas
+                showlegend=True,
+                hovermode='x unified'
+            )
+            
+            st.plotly_chart(fig2, use_container_width=True)
+        else:
+            st.info("No category data available for the selected filters")
     else:
-        st.info("No lead source data available")
-
-with col2:
-    st.subheader("📊 Lead Sources Breakdown")
-    if not lead_dist.empty:
-        total_leads = lead_dist.sum()
-        
-        # Categorize as organic vs paid
-        organic_keywords = ['ORGANIC', 'DIRECT', 'UNKNOWN']
-        paid_keywords = ['PAID', 'SOCIAL', 'EMAIL', 'REFERRAL']
-        
-        organic_count = sum([lead_dist.get(key, 0) for key in lead_dist.index if any(word in key for word in organic_keywords)])
-        paid_count = sum([lead_dist.get(key, 0) for key in lead_dist.index if any(word in key for word in paid_keywords)])
-        other_count = total_leads - organic_count - paid_count
-        
-        st.metric("🌱 Organic Leads", f"{organic_count:,} ({organic_count/total_leads*100:.1f}%)")
-        st.metric("💵 Paid/Marketing Leads", f"{paid_count:,} ({paid_count/total_leads*100:.1f}%)")
-        if other_count > 0:
-            st.metric("❓ Other Sources", f"{other_count:,} ({other_count/total_leads*100:.1f}%)")
-        
-        st.info(f"Total Qualified Leads: {total_leads:,}")
-    else:
-        st.info("No lead data available")
-
-st.markdown("---")
-
-# SECTION 5: CUSTOMER SATISFACTION
-st.header("😊 Customer Satisfaction Analysis")
-
-# Use the customer_satisfaction_analysis function from key_metrics
-try:
-    # Call the function with available parameters
-    satisfaction_summary, review_insights, top_narratives = customer_satisfaction_analysis(
-        order_reviews, 
-        orders_df=orders,
-        products_df=products_with_english,
-        order_items_df=order_items,
-        date_range=date_range
-    )
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        avg_score = review_insights.get('avg_score', 0)
-        st.metric(
-            label="⭐ Average Rating",
-            value=f"{avg_score:.2f}/5.0",
-            delta=None
-        )
-        
-        # Create mini rating distribution
-        if not satisfaction_summary.empty:
-            fig4, ax4 = plt.subplots(figsize=(6, 4))
+        st.info("No order items data available for the selected filters")
             
-            # Show satisfaction levels grouped
-            satisfied = satisfaction_summary[satisfaction_summary['review_score'].isin([4, 5])]['percentage'].sum()
-            neutral = satisfaction_summary[satisfaction_summary['review_score'] == 3]['percentage'].sum() if 3 in satisfaction_summary['review_score'].values else 0
-            dissatisfied = satisfaction_summary[satisfaction_summary['review_score'].isin([1, 2])]['percentage'].sum()
-            
-            levels = ['Satisfied', 'Neutral', 'Dissatisfied']
-            percentages = [satisfied, neutral, dissatisfied]
-            colors = ['#2ecc71', '#f39c12', '#e74c3c']
-            
-            bars = ax4.bar(levels, percentages, color=colors)
-            
-            ax4.set_ylabel("Percentage (%)", fontsize=10)
-            ax4.set_title("Satisfaction Distribution", fontsize=12, fontweight='bold')
-            ax4.set_ylim(0, 100)
-            
-            # Add percentage labels
-            for bar, val in zip(bars, percentages):
-                height = bar.get_height()
-                ax4.text(bar.get_x() + bar.get_width()/2., height,
-                        f'{val:.1f}%',
-                        ha='center', va='bottom', fontsize=9)
-            
-            plt.tight_layout()
-            st.pyplot(fig4)
-    
-    with col2:
-        satisfaction_rate = review_insights.get('satisfaction_rate', 0)
-        st.metric(
-            label="👍 Satisfaction Rate",
-            value=f"{satisfaction_rate:.1f}%",
-            delta=None
-        )
-        
-        nps_score = review_insights.get('nps_score', 0)
-        st.metric(
-            label="📈 NPS Score",
-            value=f"{nps_score:.1f}",
-            delta=None
-        )
-        
-        total_reviews = review_insights.get('total_reviews', 0)
-        st.metric(
-            label="💬 Total Reviews",
-            value=f"{total_reviews:,}",
-            delta=None
-        )
-    
-    with col3:
-        # Review score distribution chart
-        if not satisfaction_summary.empty:
-            fig5, ax5 = plt.subplots(figsize=(6, 4))
-            
-            review_dist = satisfaction_summary.groupby('review_score')['total_reviews'].sum().sort_index()
-            
-            colors = ['#e74c3c', '#e67e22', '#f39c12', '#3498db', '#2ecc71']
-            bars = ax5.bar(review_dist.index, review_dist.values, color=colors)
-            
-            ax5.set_xlabel("Review Score", fontsize=10)
-            ax5.set_ylabel("Number of Reviews", fontsize=10)
-            ax5.set_title("Review Score Distribution", fontsize=12, fontweight='bold')
-            ax5.set_xticks([1, 2, 3, 4, 5])
-            
-            # Add count labels
-            for bar, val in zip(bars, review_dist.values):
-                height = bar.get_height()
-                ax5.text(bar.get_x() + bar.get_width()/2., height,
-                        f'{int(val):,}',
-                        ha='center', va='bottom', fontsize=9)
-            
-            plt.tight_layout()
-            st.pyplot(fig5)
-
-except Exception as e:
-    st.warning(f"Unable to load satisfaction analysis: {str(e)}")
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.metric("⭐ Average Rating", "N/A")
-    with col2:
-        st.metric("👍 Satisfaction Rate", "N/A")
-    with col3:
-        st.metric("💬 Total Reviews", "N/A")
-
 st.markdown("---")
 
 # SECTION 6: DETAILED INSIGHTS
 st.header("📈 Detailed Performance Insights")
 
-tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["📈 Temporal Trends & Forecasting",  
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["📈 Temporal Trends & Forecasting",  
                             "🚚 Delivery Performance",
                             "🔄 Cohort Analysis", 
                             "👥 RFM Segmentation",
-                            "💰 Customer Lifetime Value",
-                            "💡 Key Recommendations",
+                            "💰 Customer Lifetime Value"
                             ])
 
 with tab1:
@@ -639,57 +555,5 @@ with tab5:
     display_clv_analysis_tab(filtered_orders, filtered_payments, customers, 
                             date_range, customer_state, payment_method, product_category)
 
-with tab6:
-    st.subheader("🎯 Strategic Recommendations")
-    
-    # Generate insights based on metrics
-    insights = []
-    
-    if success_rate < 95:
-        insights.append("⚠️ **Improve Order Fulfillment**: Success rate is below 95%. Focus on reducing cancellations and improving delivery processes.")
-    
-    if cancel_rate > 5:
-        insights.append("🔴 **High Cancellation Rate**: Investigate reasons for cancellations and implement preventive measures.")
-    
-    try:
-        if avg_score < 4.0:
-            insights.append("⭐ **Customer Satisfaction Alert**: Average rating is below 4.0. Implement quality improvement initiatives.")
-        
-        if nps_score < 50:
-            insights.append("📊 **NPS Improvement Needed**: Focus on converting detractors to promoters through better customer experience.")
-    except:
-        pass
-    
-    # Payment insights
-    if not conversion_data.empty:
-        top_payment = conversion_data.iloc[0]['payment_type']
-        insights.append(f"💳 **Payment Optimization**: {top_payment} is the most used payment method. Ensure smooth processing for this channel.")
-    
-    # Promotions effectiveness
-    try:
-        effectiveness_rate, _, _ = promotions_effectiveness_analysis(
-            filtered_orders, 
-            filtered_payments, 
-            filtered_order_items, 
-            sellers, 
-            products_with_english,
-            product_category_name_translation
-        )
-        if effectiveness_rate < 0.05:
-            insights.append(f"🎯 **Low Promotion Usage**: Only {effectiveness_rate:.1%} of orders use promotions. Consider more attractive promotional campaigns.")
-    except:
-        pass
-    
-    # Display insights
-    if insights:
-        for insight in insights:
-            st.write(insight)
-    else:
-        st.success("✅ All key metrics are performing well! Continue monitoring for sustained success.")
-
-# Footer
-st.markdown("---")
-st.caption("Dashboard generated with Streamlit | Data refreshed in real-time | Executive View")
-st.caption(f"Data Period: {date_range[0]} to {date_range[1]}")
 
 
