@@ -1,0 +1,996 @@
+{
+  "analysis_summary": {
+    "conclusion": "NEUTRAL: No significant difference in return intention between extended and standard MSI (p = 0.465)",
+    "confidence_level": 0.95,
+    "test_type": "one_tailed",
+    "sample_size": 76795
+  },
+  "primary_analysis": {
+    "hypothesis_test": {
+      "null_hypothesis": "\u03bc_treatment = \u03bc_control",
+      "alternative_hypothesis": "\u03bc_treatment > \u03bc_control",
+      "test_type": "one_tailed",
+      "alpha": 0.050000000000000044
+    },
+    "descriptive_stats": {
+      "treatment": {
+        "mean": 0.5160109832921945,
+        "std": 0.14537316522018343,
+        "sem": 0.0007403712142147029,
+        "n": 38554
+      },
+      "control": {
+        "mean": 0.5159203322959673,
+        "std": 0.14380222274304447,
+        "sem": 0.0007353616526408528,
+        "n": 38241
+      }
+    },
+    "effect_size": {
+      "absolute_difference": 9.065099622718176e-05,
+      "relative_lift": 0.01757073535438377,
+      "cohens_d": 0.0006269389119890978
+    },
+    "t_test": {
+      "t_statistic": 0.08686765448670747,
+      "p_value": 0.4653884683837707,
+      "degrees_of_freedom": 76793,
+      "reject_null": "False",
+      "confidence_interval": {
+        "lower": -0.0016257855390223056,
+        "upper": Infinity
+      }
+    },
+    "mann_whitney_test": {
+      "u_statistic": 739823261.5,
+      "p_value": 0.19396862999037118,
+      "reject_null": "False"
+    },
+    "assumptions": {
+      "normality_treatment": {
+        "p_value": 8.843816551023059e-48,
+        "is_normal": "False"
+      },
+      "normality_control": {
+        "p_value": 3.2979471648299023e-48,
+        "is_normal": "False"
+      }
+    },
+    "power_analysis": {
+      "observed_power": 0.0640352091002806,
+      "is_adequate": "False"
+    }
+  },
+  "regression_analysis": {
+    "linear_regression": {
+      "error": "Error evaluating factor: NameError: name 'category' is not defined\n    proxy_index ~ treatment_indicator + C(category) + C(state) + aov_standardized\n                                        ^^^^^^^^^^^"
+    },
+    "logistic_regression_s1": {
+      "error": "Input X contains NaN.\nLogisticRegression does not accept missing values encoded as NaN natively. For supervised learning, you might want to consider sklearn.ensemble.HistGradientBoostingClassifier and Regressor which accept missing values encoded as NaNs natively. Alternatively, it is possible to preprocess the data, for instance by using an imputer transformer in a pipeline or drop samples with missing values. See https://scikit-learn.org/stable/modules/impute.html You can find a list of all estimators that handle NaN values at the following page: https://scikit-learn.org/stable/modules/impute.html#estimators-that-handle-nan-values"
+    },
+    "ordinal_regression_s2": {
+      "error": "Error evaluating factor: NameError: name 'category' is not defined\n    s2_satisfaction ~ treatment_indicator + C(category) + C(state) + aov_standardized\n                                            ^^^^^^^^^^^"
+    }
+  },
+  "heterogeneity_analysis": {
+    "by_category": [
+      {
+        "category": "UTILIDADES DOMESTICAS",
+        "treatment_mean": 0.5069181300397626,
+        "control_mean": 0.5112946078614572,
+        "effect": -0.004376477821694591,
+        "relative_lift": -0.8559600970563066,
+        "sample_size": 4584,
+        "p_value": 0.26610224901737445,
+        "significant": "False"
+      },
+      {
+        "category": "AUTOMOTIVO",
+        "treatment_mean": 0.5201908473729854,
+        "control_mean": 0.5254033734803496,
+        "effect": -0.005212526107364224,
+        "relative_lift": -0.9920998551714048,
+        "sample_size": 2982,
+        "p_value": 0.3187435468691658,
+        "significant": "False"
+      },
+      {
+        "category": "PET SHOP",
+        "treatment_mean": 0.5345405566344877,
+        "control_mean": 0.5300176030024224,
+        "effect": 0.004522953632065341,
+        "relative_lift": 0.8533591349502159,
+        "sample_size": 1343,
+        "p_value": 0.5108887813761988,
+        "significant": "False"
+      },
+      {
+        "category": "PAPELARIA",
+        "treatment_mean": 0.5175069517161068,
+        "control_mean": 0.508998994374352,
+        "effect": 0.008507957341754802,
+        "relative_lift": 1.6715076917219758,
+        "sample_size": 1820,
+        "p_value": 0.15694513046388078,
+        "significant": "False"
+      },
+      {
+        "category": "MOVEIS ESCRITORIO",
+        "treatment_mean": 0.5685098829132925,
+        "control_mean": 0.5681396919808577,
+        "effect": 0.000370190932434844,
+        "relative_lift": 0.06515843509263508,
+        "sample_size": 899,
+        "p_value": 0.9666541242446567,
+        "significant": "False"
+      },
+      {
+        "category": "FERRAMENTAS JARDIM",
+        "treatment_mean": 0.5269655480997172,
+        "control_mean": 0.5203587802623867,
+        "effect": 0.006606767837330496,
+        "relative_lift": 1.2696562617813592,
+        "sample_size": 2591,
+        "p_value": 0.2199694274025457,
+        "significant": "False"
+      },
+      {
+        "category": "INFORMATICA ACESSORIOS",
+        "treatment_mean": 0.5135003010080817,
+        "control_mean": 0.5110470229756745,
+        "effect": 0.0024532780324072467,
+        "relative_lift": 0.4800493735630314,
+        "sample_size": 4724,
+        "p_value": 0.5413020536352842,
+        "significant": "False"
+      },
+      {
+        "category": "CAMA MESA BANHO",
+        "treatment_mean": 0.5070235378706093,
+        "control_mean": 0.5035488825693234,
+        "effect": 0.0034746553012858783,
+        "relative_lift": 0.6900333654910898,
+        "sample_size": 7477,
+        "p_value": 0.2681373985651396,
+        "significant": "False"
+      },
+      {
+        "category": "BRINQUEDOS",
+        "treatment_mean": 0.5243556804137238,
+        "control_mean": 0.5231101595412874,
+        "effect": 0.0012455208724364564,
+        "relative_lift": 0.23809915554472258,
+        "sample_size": 3103,
+        "p_value": 0.8004464042787391,
+        "significant": "False"
+      },
+      {
+        "category": "PERFUMARIA",
+        "treatment_mean": 0.5340586695719309,
+        "control_mean": 0.5359691672423496,
+        "effect": -0.0019104976704186205,
+        "relative_lift": -0.35645663728166466,
+        "sample_size": 2498,
+        "p_value": 0.741290941899295,
+        "significant": "False"
+      },
+      {
+        "category": "CONSTRUCAO FERRAMENTAS CONSTRUCAO",
+        "treatment_mean": 0.5367411663532077,
+        "control_mean": 0.545315207856679,
+        "effect": -0.008574041503471297,
+        "relative_lift": -1.572309258927682,
+        "sample_size": 579,
+        "p_value": 0.4643851528993981,
+        "significant": "False"
+      },
+      {
+        "category": "TELEFONIA",
+        "treatment_mean": 0.45948423236544583,
+        "control_mean": 0.4726873896581916,
+        "effect": -0.013203157292745793,
+        "relative_lift": -2.7932112388894534,
+        "sample_size": 3120,
+        "p_value": 0.0069050862113703695,
+        "significant": "True"
+      },
+      {
+        "category": "BELEZA SAUDE",
+        "treatment_mean": 0.5241821355306501,
+        "control_mean": 0.5215974535984359,
+        "effect": 0.0025846819322141723,
+        "relative_lift": 0.4955319306838585,
+        "sample_size": 6870,
+        "p_value": 0.4631841870843647,
+        "significant": "False"
+      },
+      {
+        "category": "ELETRONICOS",
+        "treatment_mean": 0.46012868266575796,
+        "control_mean": 0.4704139644807635,
+        "effect": -0.010285281815005543,
+        "relative_lift": -2.1864320771936048,
+        "sample_size": 1850,
+        "p_value": 0.09200168952172753,
+        "significant": "False"
+      },
+      {
+        "category": "BEBES",
+        "treatment_mean": 0.5131253709575296,
+        "control_mean": 0.5119143261595969,
+        "effect": 0.0012110447979327699,
+        "relative_lift": 0.23657177305782387,
+        "sample_size": 2261,
+        "p_value": 0.8415860388135261,
+        "significant": "False"
+      },
+      {
+        "category": "RELOGIOS PRESENTES",
+        "treatment_mean": 0.5573551572541635,
+        "control_mean": 0.5508032443327198,
+        "effect": 0.006551912921443748,
+        "relative_lift": 1.1895196676593975,
+        "sample_size": 4581,
+        "p_value": 0.13002620915727042,
+        "significant": "False"
+      },
+      {
+        "category": "CLIMATIZACAO",
+        "treatment_mean": 0.5636218276245959,
+        "control_mean": 0.5546471213927917,
+        "effect": 0.008974706231804186,
+        "relative_lift": 1.618092997448093,
+        "sample_size": 192,
+        "p_value": 0.6576728590564148,
+        "significant": "False"
+      },
+      {
+        "category": "MOVEIS DECORACAO",
+        "treatment_mean": 0.5138489545641526,
+        "control_mean": 0.512487230877393,
+        "effect": 0.001361723686759575,
+        "relative_lift": 0.265708803013153,
+        "sample_size": 4854,
+        "p_value": 0.7317650382619658,
+        "significant": "False"
+      },
+      {
+        "category": "ESPORTE LAZER",
+        "treatment_mean": 0.5221893451760296,
+        "control_mean": 0.5181035797153162,
+        "effect": 0.004085765460713375,
+        "relative_lift": 0.7886001218054491,
+        "sample_size": 5895,
+        "p_value": 0.2583221684788105,
+        "significant": "False"
+      },
+      {
+        "category": "ELETROPORTATEIS",
+        "treatment_mean": 0.5474003225914931,
+        "control_mean": 0.5645235879779921,
+        "effect": -0.017123265386498998,
+        "relative_lift": -3.0332240762216913,
+        "sample_size": 492,
+        "p_value": 0.18020018455622702,
+        "significant": "False"
+      },
+      {
+        "category": "COOL STUFF",
+        "treatment_mean": 0.5551619099732534,
+        "control_mean": 0.5532675628418174,
+        "effect": 0.0018943471314359916,
+        "relative_lift": 0.34239258880564394,
+        "sample_size": 2838,
+        "p_value": 0.7098908723377828,
+        "significant": "False"
+      },
+      {
+        "category": "FASHION UNDERWEAR E MODA PRAIA",
+        "treatment_mean": 0.4744066979994281,
+        "control_mean": 0.4696161766334096,
+        "effect": 0.004790521366018485,
+        "relative_lift": 1.020092919362539,
+        "sample_size": 93,
+        "p_value": 0.8908013591811983,
+        "significant": "False"
+      },
+      {
+        "category": "FASHION BOLSAS E ACESSORIOS",
+        "treatment_mean": 0.4841866665224361,
+        "control_mean": 0.4945837320008854,
+        "effect": -0.010397065478449319,
+        "relative_lift": -2.102185091367038,
+        "sample_size": 1388,
+        "p_value": 0.14297781300365991,
+        "significant": "False"
+      },
+      {
+        "category": "LIVROS TECNICOS",
+        "treatment_mean": 0.48921464017537164,
+        "control_mean": 0.509199651616688,
+        "effect": -0.01998501144131637,
+        "relative_lift": -3.924788907035733,
+        "sample_size": 190,
+        "p_value": 0.24997417323419363,
+        "significant": "False"
+      },
+      {
+        "category": "ALIMENTOS",
+        "treatment_mean": 0.48540843531144356,
+        "control_mean": 0.47692532878905886,
+        "effect": 0.008483106522384709,
+        "relative_lift": 1.7787074852836628,
+        "sample_size": 324,
+        "p_value": 0.5448758890585221,
+        "significant": "False"
+      },
+      {
+        "category": "ELETRODOMESTICOS",
+        "treatment_mean": 0.4810912977941774,
+        "control_mean": 0.5025461374226515,
+        "effect": -0.02145483962847411,
+        "relative_lift": -4.269227844135264,
+        "sample_size": 611,
+        "p_value": 0.04957626052321794,
+        "significant": "True"
+      },
+      {
+        "category": "MARKET PLACE",
+        "treatment_mean": 0.5103217317364486,
+        "control_mean": 0.51981046963609,
+        "effect": -0.009488737899641442,
+        "relative_lift": -1.8254226211111786,
+        "sample_size": 194,
+        "p_value": 0.582830225121675,
+        "significant": "False"
+      },
+      {
+        "category": "ARTIGOS DE FESTAS",
+        "treatment_mean": 0.4827693791530563,
+        "control_mean": 0.5047450339581714,
+        "effect": -0.021975654805115097,
+        "relative_lift": -4.353812980146376,
+        "sample_size": 27,
+        "p_value": 0.7032668131184188,
+        "significant": "False"
+      },
+      {
+        "category": "INDUSTRIA COMERCIO E NEGOCIOS",
+        "treatment_mean": 0.5396470919798907,
+        "control_mean": 0.5548594038835263,
+        "effect": -0.01521231190363559,
+        "relative_lift": -2.7416516323167324,
+        "sample_size": 179,
+        "p_value": 0.4113669166256696,
+        "significant": "False"
+      },
+      {
+        "category": "LIVROS INTERESSE GERAL",
+        "treatment_mean": 0.5068306049690467,
+        "control_mean": 0.5017838781615485,
+        "effect": 0.005046726807498292,
+        "relative_lift": 1.0057570653701844,
+        "sample_size": 379,
+        "p_value": 0.7153900688234608,
+        "significant": "False"
+      },
+      {
+        "category": "CONSOLES GAMES",
+        "treatment_mean": 0.4960431120092661,
+        "control_mean": 0.5199278769565286,
+        "effect": -0.02388476494726255,
+        "relative_lift": -4.593861188416247,
+        "sample_size": 810,
+        "p_value": 0.018659391463138348,
+        "significant": "True"
+      },
+      {
+        "category": "TELEFONIA FIXA",
+        "treatment_mean": 0.5056444797569899,
+        "control_mean": 0.5038850726272774,
+        "effect": 0.0017594071297124536,
+        "relative_lift": 0.34916833724381485,
+        "sample_size": 162,
+        "p_value": 0.93020334163194,
+        "significant": "False"
+      },
+      {
+        "category": "BEBIDAS",
+        "treatment_mean": 0.48223452535126954,
+        "control_mean": 0.48016848391383127,
+        "effect": 0.0020660414374382707,
+        "relative_lift": 0.4302742696892686,
+        "sample_size": 231,
+        "p_value": 0.8944948414552851,
+        "significant": "False"
+      },
+      {
+        "category": "MOVEIS COZINHA AREA DE SERVICO JANTAR E JARDIM",
+        "treatment_mean": 0.5776690548218518,
+        "control_mean": 0.5672688572650088,
+        "effect": 0.010400197556843072,
+        "relative_lift": 1.8333806666182721,
+        "sample_size": 190,
+        "p_value": 0.5787135537519932,
+        "significant": "False"
+      },
+      {
+        "category": "FASHION CALCADOS",
+        "treatment_mean": 0.5089944179383773,
+        "control_mean": 0.5209062353373083,
+        "effect": -0.01191181739893099,
+        "relative_lift": -2.2867488601317274,
+        "sample_size": 195,
+        "p_value": 0.5087014173587674,
+        "significant": "False"
+      },
+      {
+        "category": "CASA CONSTRUCAO",
+        "treatment_mean": 0.5497581558389917,
+        "control_mean": 0.5409772376577946,
+        "effect": 0.008780918181197084,
+        "relative_lift": 1.6231585305168827,
+        "sample_size": 383,
+        "p_value": 0.5143114897562918,
+        "significant": "False"
+      },
+      {
+        "category": "AUDIO",
+        "treatment_mean": 0.5082900642818954,
+        "control_mean": 0.5057321816658853,
+        "effect": 0.0025578826160100876,
+        "relative_lift": 0.5057780993063176,
+        "sample_size": 250,
+        "p_value": 0.9029731390499989,
+        "significant": "False"
+      },
+      {
+        "category": "ELETRODOMESTICOS 2",
+        "treatment_mean": 0.6142673229723039,
+        "control_mean": 0.6380805782469403,
+        "effect": -0.023813255274636402,
+        "relative_lift": -3.7320138061654897,
+        "sample_size": 183,
+        "p_value": 0.23278112525794592,
+        "significant": "False"
+      },
+      {
+        "category": "MALAS ACESSORIOS",
+        "treatment_mean": 0.5531961203566114,
+        "control_mean": 0.5565041586211823,
+        "effect": -0.003308038264570934,
+        "relative_lift": -0.5944319037555921,
+        "sample_size": 831,
+        "p_value": 0.7129942237499174,
+        "significant": "False"
+      },
+      {
+        "category": "CONSTRUCAO FERRAMENTAS ILUMINACAO",
+        "treatment_mean": 0.558524897613197,
+        "control_mean": 0.583856205509848,
+        "effect": -0.025331307896650945,
+        "relative_lift": -4.338620992223689,
+        "sample_size": 172,
+        "p_value": 0.27678493359693684,
+        "significant": "False"
+      },
+      {
+        "category": "INSTRUMENTOS MUSICAIS",
+        "treatment_mean": 0.5458098234564547,
+        "control_mean": 0.5702671261703961,
+        "effect": -0.02445730271394142,
+        "relative_lift": -4.288744974339195,
+        "sample_size": 469,
+        "p_value": 0.09924732536596978,
+        "significant": "False"
+      },
+      {
+        "category": "FASHION ROUPA MASCULINA",
+        "treatment_mean": 0.49462161755421924,
+        "control_mean": 0.46429054947626136,
+        "effect": 0.03033106807795788,
+        "relative_lift": 6.532777398155651,
+        "sample_size": 89,
+        "p_value": 0.35323356957082197,
+        "significant": "False"
+      },
+      {
+        "category": "CINE FOTO",
+        "treatment_mean": 0.4952333068082443,
+        "control_mean": 0.502248273278874,
+        "effect": -0.007014966470629713,
+        "relative_lift": -1.3967129095005657,
+        "sample_size": 42,
+        "p_value": 0.865363929323228,
+        "significant": "False"
+      },
+      {
+        "category": "CASA CONFORTO",
+        "treatment_mean": 0.534548558015223,
+        "control_mean": 0.5386748730021992,
+        "effect": -0.004126314986976132,
+        "relative_lift": -0.7660121520016185,
+        "sample_size": 300,
+        "p_value": 0.801727581947687,
+        "significant": "False"
+      },
+      {
+        "category": "MOVEIS SALA",
+        "treatment_mean": 0.5545553331657944,
+        "control_mean": 0.5439310718116293,
+        "effect": 0.010624261354165165,
+        "relative_lift": 1.953236706772378,
+        "sample_size": 326,
+        "p_value": 0.48216492835615066,
+        "significant": "False"
+      },
+      {
+        "category": "CONSTRUCAO FERRAMENTAS SEGURANCA",
+        "treatment_mean": 0.561768544781715,
+        "control_mean": 0.5561963078884635,
+        "effect": 0.005572236893251481,
+        "relative_lift": 1.0018471561607176,
+        "sample_size": 121,
+        "p_value": 0.8485358834385303,
+        "significant": "False"
+      },
+      {
+        "category": "ARTES",
+        "treatment_mean": 0.48374530971729285,
+        "control_mean": 0.4850550736345527,
+        "effect": -0.001309763917259843,
+        "relative_lift": -0.27002375368340903,
+        "sample_size": 144,
+        "p_value": 0.9509419041871002,
+        "significant": "False"
+      },
+      {
+        "category": "CONSTRUCAO FERRAMENTAS JARDIM",
+        "treatment_mean": 0.5140311199268025,
+        "control_mean": 0.5302958527043723,
+        "effect": -0.01626473277756979,
+        "relative_lift": -3.067105408164865,
+        "sample_size": 151,
+        "p_value": 0.4497818487056303,
+        "significant": "False"
+      },
+      {
+        "category": "ALIMENTOS BEBIDAS",
+        "treatment_mean": 0.5035747047081933,
+        "control_mean": 0.4907065317039318,
+        "effect": 0.012868173004261518,
+        "relative_lift": 2.6223765474606604,
+        "sample_size": 162,
+        "p_value": 0.5028713447001438,
+        "significant": "False"
+      },
+      {
+        "category": "TABLETS IMPRESSAO IMAGEM",
+        "treatment_mean": 0.5124395434497226,
+        "control_mean": 0.48272714919829696,
+        "effect": 0.02971239425142569,
+        "relative_lift": 6.155111495338807,
+        "sample_size": 60,
+        "p_value": 0.2934323965667256,
+        "significant": "False"
+      },
+      {
+        "category": "FASHION ESPORTE",
+        "treatment_mean": 0.5332010039272526,
+        "control_mean": 0.41264034466037525,
+        "effect": 0.12056065926687731,
+        "relative_lift": 29.21688604300316,
+        "sample_size": 16,
+        "p_value": 0.15243403961093577,
+        "significant": "False"
+      },
+      {
+        "category": "PORTATEIS COZINHA E PREPARADORES DE ALIMENTOS",
+        "treatment_mean": 0.5319853407437801,
+        "control_mean": 0.46169756425081127,
+        "effect": 0.07028777649296886,
+        "relative_lift": 15.223770263337567,
+        "sample_size": 8,
+        "p_value": 0.705439182541475,
+        "significant": "False"
+      },
+      {
+        "category": "LA CUISINE",
+        "treatment_mean": 0.6077940243947928,
+        "control_mean": 0.6434849679249346,
+        "effect": -0.035690943530141794,
+        "relative_lift": -5.546507736650859,
+        "sample_size": 12,
+        "p_value": 0.23707674750726057,
+        "significant": "False"
+      },
+      {
+        "category": "FLORES",
+        "treatment_mean": 0.4696296867741159,
+        "control_mean": 0.4927190072719741,
+        "effect": -0.023089320497858223,
+        "relative_lift": -4.686103064238647,
+        "sample_size": 22,
+        "p_value": 0.6111202543372094,
+        "significant": "False"
+      },
+      {
+        "category": "PCS",
+        "treatment_mean": 0.686625583874541,
+        "control_mean": 0.6966216216216216,
+        "effect": -0.009996037747080577,
+        "relative_lift": -1.4349307338195205,
+        "sample_size": 155,
+        "p_value": 0.5803789796816705,
+        "significant": "False"
+      },
+      {
+        "category": "ARTIGOS DE NATAL",
+        "treatment_mean": 0.48036852702331456,
+        "control_mean": 0.46711873355779543,
+        "effect": 0.013249793465519133,
+        "relative_lift": 2.8364937035606537,
+        "sample_size": 98,
+        "p_value": 0.6134750329588675,
+        "significant": "False"
+      },
+      {
+        "category": "CASA CONFORTO 2",
+        "treatment_mean": 0.4612880002984072,
+        "control_mean": 0.43245438425838256,
+        "effect": 0.028833616040024657,
+        "relative_lift": 6.6674352462564395,
+        "sample_size": 16,
+        "p_value": 0.6538862908827501,
+        "significant": "False"
+      },
+      {
+        "category": "PORTATEIS CASA FORNO E CAFE",
+        "treatment_mean": 0.6283053452198888,
+        "control_mean": 0.6139485783094272,
+        "effect": 0.014356766910461616,
+        "relative_lift": 2.338431493724524,
+        "sample_size": 64,
+        "p_value": 0.7133413209497019,
+        "significant": "False"
+      },
+      {
+        "category": "PC GAMER",
+        "treatment_mean": 0.2456665671975829,
+        "control_mean": 0.512746030561876,
+        "effect": -0.26707946336429306,
+        "relative_lift": -52.0880606470269,
+        "sample_size": 4,
+        "p_value": 0.1502523440837359,
+        "significant": "False"
+      },
+      {
+        "category": "AGRO INDUSTRIA E COMERCIO",
+        "treatment_mean": 0.6012656971715356,
+        "control_mean": 0.5921866516634133,
+        "effect": 0.009079045508122219,
+        "relative_lift": 1.5331391686421465,
+        "sample_size": 125,
+        "p_value": 0.7316522258037272,
+        "significant": "False"
+      },
+      {
+        "category": "MOVEIS QUARTO",
+        "treatment_mean": 0.6008115278451267,
+        "control_mean": 0.5867502093937247,
+        "effect": 0.014061318451402016,
+        "relative_lift": 2.3964743814801954,
+        "sample_size": 65,
+        "p_value": 0.707937912480043,
+        "significant": "False"
+      },
+      {
+        "category": "CONSTRUCAO FERRAMENTAS FERRAMENTAS",
+        "treatment_mean": 0.5767097528705242,
+        "control_mean": 0.5365834095369053,
+        "effect": 0.040126343333618864,
+        "relative_lift": 7.478118521824899,
+        "sample_size": 74,
+        "p_value": 0.16763504943619495,
+        "significant": "False"
+      },
+      {
+        "category": "MOVEIS COLCHAO E ESTOFADO",
+        "treatment_mean": 0.49129407205706216,
+        "control_mean": 0.5553685951235281,
+        "effect": -0.06407452306646594,
+        "relative_lift": -11.537296784348085,
+        "sample_size": 33,
+        "p_value": 0.16273314305340927,
+        "significant": "False"
+      },
+      {
+        "category": "SINALIZACAO E SEGURANCA",
+        "treatment_mean": 0.5366379605107737,
+        "control_mean": 0.5323223788012427,
+        "effect": 0.004315581709531058,
+        "relative_lift": 0.8107083003441417,
+        "sample_size": 94,
+        "p_value": 0.8609948215428256,
+        "significant": "False"
+      },
+      {
+        "category": "FASHION ROUPA FEMININA",
+        "treatment_mean": 0.4497616668400832,
+        "control_mean": 0.5080727321048901,
+        "effect": -0.05831106526480695,
+        "relative_lift": -11.476912965439128,
+        "sample_size": 27,
+        "p_value": 0.20850241978395448,
+        "significant": "False"
+      },
+      {
+        "category": "FRALDAS HIGIENE",
+        "treatment_mean": 0.479181431608788,
+        "control_mean": 0.3726777077349646,
+        "effect": 0.1065037238738234,
+        "relative_lift": 28.577970096769278,
+        "sample_size": 20,
+        "p_value": 0.12656302879362974,
+        "significant": "False"
+      },
+      {
+        "category": "LIVROS IMPORTADOS",
+        "treatment_mean": 0.4803994683809947,
+        "control_mean": 0.5510898995727949,
+        "effect": -0.07069043119180018,
+        "relative_lift": -12.827386465728994,
+        "sample_size": 40,
+        "p_value": 0.0785055200049976,
+        "significant": "False"
+      },
+      {
+        "category": "DVDS BLU RAY",
+        "treatment_mean": 0.4378333768510575,
+        "control_mean": 0.4755330921208052,
+        "effect": -0.03769971526974769,
+        "relative_lift": -7.927884703378413,
+        "sample_size": 44,
+        "p_value": 0.4313550695276138,
+        "significant": "False"
+      },
+      {
+        "category": "MUSICA",
+        "treatment_mean": 0.49731268489055047,
+        "control_mean": 0.5987434257152449,
+        "effect": -0.10143074082469439,
+        "relative_lift": -16.940602012210423,
+        "sample_size": 27,
+        "p_value": 0.09771976941687668,
+        "significant": "False"
+      },
+      {
+        "category": "ARTES E ARTESANATO",
+        "treatment_mean": 0.486016556273746,
+        "control_mean": 0.5121674002511595,
+        "effect": -0.026150843977413463,
+        "relative_lift": -5.105917316211354,
+        "sample_size": 13,
+        "p_value": 0.7367915561584084,
+        "significant": "False"
+      },
+      {
+        "category": "CDS DVDS MUSICAIS",
+        "treatment_mean": 0.5218490059308442,
+        "control_mean": 0.5183332089969787,
+        "effect": 0.0035157969338655004,
+        "relative_lift": 0.6782889602363861,
+        "sample_size": 9,
+        "p_value": 0.9081653142590101,
+        "significant": "False"
+      },
+      {
+        "category": "FASHION ROUPA INFANTO JUVENIL",
+        "treatment_mean": 0.5683119474803238,
+        "control_mean": 0.5135169159610579,
+        "effect": 0.0547950315192659,
+        "relative_lift": 10.670540700049935,
+        "sample_size": 5,
+        "p_value": 0.020918706169748637,
+        "significant": "True"
+      }
+    ],
+    "by_state": [
+      {
+        "state": "SP",
+        "treatment_mean": 0.5161767751607406,
+        "control_mean": 0.5173639395181037,
+        "effect": -0.0011871643573631019,
+        "relative_lift": -0.22946407097272392,
+        "sample_size": 32168,
+        "p_value": 0.4233193454859083,
+        "significant": "False"
+      },
+      {
+        "state": "RJ",
+        "treatment_mean": 0.495154328503638,
+        "control_mean": 0.494951745081389,
+        "effect": 0.00020258342224899195,
+        "relative_lift": 0.04092993393036315,
+        "sample_size": 10288,
+        "p_value": 0.9505497851042817,
+        "significant": "False"
+      },
+      {
+        "state": "MG",
+        "treatment_mean": 0.5279058267626999,
+        "control_mean": 0.52506428035963,
+        "effect": 0.0028415464030698834,
+        "relative_lift": 0.5411806724166487,
+        "sample_size": 9070,
+        "p_value": 0.3168203960518208,
+        "significant": "False"
+      },
+      {
+        "state": "RS",
+        "treatment_mean": 0.5254324603557082,
+        "control_mean": 0.5273845178971058,
+        "effect": -0.0019520575413976005,
+        "relative_lift": -0.3701393338547819,
+        "sample_size": 3985,
+        "p_value": 0.6597175236445699,
+        "significant": "False"
+      },
+      {
+        "state": "PR",
+        "treatment_mean": 0.5302061740751917,
+        "control_mean": 0.5269455156110757,
+        "effect": 0.0032606584641159397,
+        "relative_lift": 0.6187847448202869,
+        "sample_size": 3786,
+        "p_value": 0.4430779231666271,
+        "significant": "False"
+      }
+    ],
+    "by_aov_quartile": [
+      {
+        "quartile": "Q1",
+        "treatment_mean": 0.4450979564540678,
+        "control_mean": 0.4469573052763485,
+        "effect": -0.0018593488222807264,
+        "relative_lift": -0.4160014391377075,
+        "sample_size": 19076,
+        "p_value": 0.2488262080007026,
+        "significant": "False"
+      },
+      {
+        "quartile": "Q2",
+        "treatment_mean": 0.4737149075838642,
+        "control_mean": 0.47375986369677664,
+        "effect": -4.495611291244206e-05,
+        "relative_lift": -0.009489219403612373,
+        "sample_size": 19063,
+        "p_value": 0.9793455174835008,
+        "significant": "False"
+      },
+      {
+        "quartile": "Q3",
+        "treatment_mean": 0.5250141960678996,
+        "control_mean": 0.5260599528102191,
+        "effect": -0.001045756742319548,
+        "relative_lift": -0.1987904110041264,
+        "sample_size": 19072,
+        "p_value": 0.5528141551572358,
+        "significant": "False"
+      },
+      {
+        "quartile": "Q4",
+        "treatment_mean": 0.6302907854096982,
+        "control_mean": 0.6301884572489446,
+        "effect": 0.0001023281607536175,
+        "relative_lift": 0.016237707875565645,
+        "sample_size": 19067,
+        "p_value": 0.9576415026011562,
+        "significant": "False"
+      }
+    ],
+    "interaction_effects": {
+      "error": "Number of rows mismatch between data argument and C(category) (76795 versus 1)\n    proxy_index ~ treatment_indicator * C(category) +                                                   treatment_indicator * C(state) +                                                   treatment_indicator * aov_standardized\n                                        ^^^^^^^^^^^"
+    }
+  },
+  "secondary_metrics": {
+    "s1_delivery": {
+      "treatment_rate": 0.8924365824557763,
+      "control_rate": 0.8955309746084046,
+      "absolute_difference": -0.0030943921526283003,
+      "relative_lift": -0.34553714392530077,
+      "chi2_statistic": 1.9069984490192633,
+      "p_value": 0.16729705730655636,
+      "significant": "False"
+    },
+    "s2_satisfaction": {
+      "treatment_mean": 0.817383219560623,
+      "treatment_std": 0.26886446312574186,
+      "control_mean": 0.8178013979680249,
+      "control_std": 0.26832071427128296,
+      "absolute_difference": -0.0004181784074018813,
+      "relative_lift": -0.05113446962072832,
+      "t_statistic": -0.21572398511967486,
+      "p_value": 0.8292034769035717,
+      "significant": "False"
+    },
+    "payment_installments": {
+      "treatment_mean": 3.5119313171136586,
+      "treatment_std": 2.8548752787945486,
+      "control_mean": 3.513114196804477,
+      "control_std": 2.850547152711228,
+      "absolute_difference": -0.001182879690818428,
+      "relative_lift": -0.03367040251337494,
+      "t_statistic": -0.057453192665000145,
+      "p_value": 0.9541843408034137,
+      "significant": "False"
+    },
+    "aov": {
+      "treatment_mean": 167.6342095780238,
+      "treatment_std": 227.39840571144376,
+      "control_mean": 165.97849481333262,
+      "control_std": 222.34814682524484,
+      "absolute_difference": 1.6557147646911972,
+      "relative_lift": 0.9975477645783437,
+      "t_statistic": 1.0166376661370617,
+      "p_value": 0.3093290535336074,
+      "significant": "False"
+    },
+    "installment_distribution": {
+      "treatment": {
+        "0": 2,
+        "1": 12842,
+        "2": 6148,
+        "3": 5248,
+        "4": 3565,
+        "5": 2620,
+        "6": 1933,
+        "7": 821,
+        "8": 2167,
+        "9": 334,
+        "10": 2713,
+        "11": 8,
+        "12": 63,
+        "13": 8,
+        "14": 6,
+        "15": 39,
+        "16": 1,
+        "17": 5,
+        "18": 12,
+        "20": 11,
+        "21": 1,
+        "22": 1,
+        "23": 1,
+        "24": 5
+      },
+      "control": {
+        "1": 12539,
+        "2": 6270,
+        "3": 5225,
+        "4": 3532,
+        "5": 2631,
+        "6": 1994,
+        "7": 811,
+        "8": 2115,
+        "9": 312,
+        "10": 2632,
+        "11": 15,
+        "12": 70,
+        "13": 8,
+        "14": 9,
+        "15": 35,
+        "16": 4,
+        "17": 3,
+        "18": 15,
+        "20": 6,
+        "21": 2,
+        "24": 13
+      }
+    }
+  },
+  "recommendations": [
+    "Extended MSI does not show significant impact - maintain current offering",
+    "Consider testing other interventions to increase return intention",
+    "Increase sample size for future experiments to achieve 80% statistical power"
+  ]
+}

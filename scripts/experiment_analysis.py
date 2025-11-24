@@ -215,7 +215,7 @@ class ExperimentAnalysis:
         le_state = LabelEncoder()
         
         regression_data['category_encoded'] = le_category.fit_transform(
-            regression_data['category'].fillna('unknown')
+            regression_data['product_category_name'].fillna('unknown')
         )
         regression_data['state_encoded'] = le_state.fit_transform(
             regression_data['state'].fillna('unknown')
@@ -313,8 +313,8 @@ class ExperimentAnalysis:
         
         # Analyze by category
         category_effects = []
-        for category in self.results['category'].unique():
-            category_data = self.results[self.results['category'] == category]
+        for category in self.results['product_category_name'].unique():
+            category_data = self.results[self.results['product_category_name'] == category]
             
             treatment_cat = category_data[category_data['assignment'] == 'treatment']['proxy_index']
             control_cat = category_data[category_data['assignment'] == 'control']['proxy_index']
@@ -558,7 +558,7 @@ class ExperimentAnalysis:
             if self.heterogeneity_results:
                 # Check for significant heterogeneity
                 sig_categories = [
-                    c['category'] for c in self.heterogeneity_results['by_category'] 
+                    c['product_category_name'] for c in self.heterogeneity_results['by_category'] 
                     if c['significant'] and c['effect'] > 0
                 ]
                 if sig_categories:
